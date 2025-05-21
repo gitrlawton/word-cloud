@@ -1,12 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-
-type TermCount = {
-  term: string
-  count: number
-  category: "responsibilities" | "qualifications"
-}
+import type { TermCount } from "./terms-skills-generator"
 
 interface TermsCloudProps {
   terms: TermCount[]
@@ -21,13 +16,22 @@ export function TermsCloud({ terms }: TermsCloudProps) {
     const container = containerRef.current
     container.innerHTML = ""
 
+    // Sanitize terms to ensure all have valid properties
+    const sanitizedTerms = terms.map((term) => ({
+      ...term,
+      term: String(term.term || "Unknown Term"),
+      count: typeof term.count === "number" ? term.count : 1,
+      category: term.category || "qualifications",
+      sources: Array.isArray(term.sources) ? term.sources : [],
+    }))
+
     // Find the maximum count to scale the font sizes
-    const maxCount = Math.max(...terms.map((t) => t.count))
+    const maxCount = Math.max(...sanitizedTerms.map((t) => t.count))
     const minFontSize = 14
     const maxFontSize = 42
 
     // Create and position the terms
-    terms.slice(0, 100).forEach((term) => {
+    sanitizedTerms.slice(0, 100).forEach((term) => {
       const fontSize = minFontSize + (term.count / maxCount) * (maxFontSize - minFontSize)
 
       const span = document.createElement("span")
@@ -38,7 +42,16 @@ export function TermsCloud({ terms }: TermsCloudProps) {
       span.style.cursor = "pointer"
       span.style.transition = "transform 0.2s ease"
       span.style.color = term.category === "responsibilities" ? "var(--primary)" : "var(--destructive)"
-      span.title = `${term.term}: ${term.count} occurrences (${term.category})`
+
+      // Create tooltip text with sources if available
+      let tooltipText = `${term.term}: ${term.count} occurrences (${term.category})`
+      if (term.sources && term.sources.length > 0) {
+        tooltipText += `\nSources: ${term.sources
+          .filter((s) => s && typeof s === "object")
+          .map((s) => `${String(s.company || "Unknown Company")} - ${String(s.role || "Unknown Role")}`)
+          .join(", ")}`
+      }
+      span.title = tooltipText
 
       span.addEventListener("mouseover", () => {
         span.style.transform = "scale(1.1)"

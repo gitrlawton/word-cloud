@@ -4,21 +4,21 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TermsCloud } from "@/components/terms-cloud"
 import { TermsTable } from "@/components/terms-table"
 import { useToast } from "@/hooks/use-toast"
 import { PlusCircle, RotateCw } from "lucide-react"
+import { Label } from "@/components/ui/label"
 
-type TermCount = {
+export type TermCount = {
   term: string
   count: number
   category: "responsibilities" | "qualifications"
-  sources: Array<{
+  sources?: Array<{
     company: string
     role: string
-    count: number
   }>
 }
 
@@ -51,8 +51,6 @@ export function TermsSkillsGenerator() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          company: company.trim() || "Unspecified Company",
-          role: role.trim() || "Unspecified Role",
           responsibilities,
           qualifications,
         }),
@@ -68,16 +66,16 @@ export function TermsSkillsGenerator() {
         throw new Error("Invalid response format")
       }
 
-      // Add source information to each term
-      const termsWithSource = data.terms.map((term: any) => ({
+      // Add source information to terms
+      const sourceInfo = {
+        company: company.trim() || "Unknown Company",
+        role: role.trim() || "Unknown Role",
+      }
+
+      const termsWithSource = data.terms.map((term: TermCount) => ({
         ...term,
-        sources: [
-          {
-            company: company.trim() || "Unspecified Company",
-            role: role.trim() || "Unspecified Role",
-            count: term.count,
-          },
-        ],
+        count: typeof term.count === "number" ? term.count : 1, // Ensure count is a number
+        sources: [sourceInfo],
       }))
 
       // Merge new terms with existing terms
@@ -90,10 +88,11 @@ export function TermsSkillsGenerator() {
       })
 
       // Clear the input fields
-      setCompany("")
-      setRole("")
       setResponsibilities("")
       setQualifications("")
+      // Clear company and role as well
+      setCompany("")
+      setRole("")
     } catch (error) {
       console.error("Error analyzing job listing:", error)
       toast({
@@ -111,7 +110,10 @@ export function TermsSkillsGenerator() {
 
     // Add existing terms to the map
     existingTerms.forEach((term) => {
-      termMap.set(term.term, term)
+      termMap.set(term.term, {
+        ...term,
+        count: typeof term.count === "number" ? term.count : 1, // Ensure count is a number
+      })
     })
 
     // Merge new terms
@@ -120,14 +122,30 @@ export function TermsSkillsGenerator() {
 
       if (existingTerm) {
         // Update count if term already exists
+        const existingCount = typeof existingTerm.count === "number" ? existingTerm.count : 0
+        const newCount = typeof newTerm.count === "number" ? newTerm.count : 1
+
         termMap.set(newTerm.term, {
           ...existingTerm,
-          count: existingTerm.count + newTerm.count,
-          sources: [...existingTerm.sources, ...newTerm.sources],
+          count: existingCount + newCount,
+          // Merge sources arrays, avoiding duplicates
+          sources: [
+            ...(existingTerm.sources || []),
+            ...(newTerm.sources || []).filter(
+              (newSource) =>
+                !(existingTerm.sources || []).some(
+                  (existingSource) =>
+                    existingSource.company === newSource.company && existingSource.role === newSource.role,
+                ),
+            ),
+          ],
         })
       } else {
         // Add new term
-        termMap.set(newTerm.term, newTerm)
+        termMap.set(newTerm.term, {
+          ...newTerm,
+          count: typeof newTerm.count === "number" ? newTerm.count : 1, // Ensure count is a number
+        })
       }
     })
 
@@ -145,19 +163,28 @@ export function TermsSkillsGenerator() {
     })
   }
 
+  // Calculate total mentions safely
+  const calculateTotalMentions = () => {
+    return termsData.reduce((sum, term) => {
+      const count = typeof term.count === "number" ? term.count : 0
+      return sum + count
+    }, 0)
+  }
+
   return (
     <div className="grid gap-6">
-      <Card className="w-full">
+      {/* Job Listing Information Card */}
+      <Card>
         <CardHeader>
           <CardTitle>Job Listing Information</CardTitle>
-          <CardDescription>Optionally provide company and role information</CardDescription>
+          <CardDescription>
+            Enter company and role information about the job listing
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="company" className="block text-sm font-medium mb-1">
-                Company (Optional)
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="company">Company (Optional)</Label>
               <Input
                 id="company"
                 placeholder="Enter company name"
@@ -165,10 +192,8 @@ export function TermsSkillsGenerator() {
                 onChange={(e) => setCompany(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium mb-1">
-                Role (Optional)
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role (Optional)</Label>
               <Input
                 id="role"
                 placeholder="Enter job role/title"
@@ -243,8 +268,7 @@ export function TermsSkillsGenerator() {
           <CardHeader>
             <CardTitle>Terms & Skills Cloud</CardTitle>
             <CardDescription>
-              Showing {termsData.length} unique terms from {termsData.reduce((sum, term) => sum + term.count, 0)} total
-              mentions
+              Showing {termsData.length} unique terms from {calculateTotalMentions()} total mentions
             </CardDescription>
             <Tabs defaultValue="cloud" onValueChange={(value) => setActiveTab(value as "cloud" | "table")}>
               <TabsList className="grid w-[400px] grid-cols-2">

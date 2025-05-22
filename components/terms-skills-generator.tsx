@@ -1,16 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { TermsCloud } from "@/components/terms-cloud"
 import { TermsTable } from "@/components/terms-table"
 import { useToast } from "@/hooks/use-toast"
-import { PlusCircle, RotateCw } from "lucide-react"
+import { PlusCircle, RotateCw, AlertCircle } from "lucide-react"
 import { Label } from "@/components/ui/label"
+import { Progress } from "@/components/ui/progress"
 
 export type TermCount = {
   term: string
@@ -22,21 +25,81 @@ export type TermCount = {
   }>
 }
 
+const CHARACTER_LIMIT = 650
+
 export function TermsSkillsGenerator() {
   const [company, setCompany] = useState("")
   const [role, setRole] = useState("")
   const [responsibilities, setResponsibilities] = useState("")
   const [qualifications, setQualifications] = useState("")
+  const [responsibilitiesChars, setResponsibilitiesChars] = useState(0)
+  const [qualificationsChars, setQualificationsChars] = useState(0)
   const [termsData, setTermsData] = useState<TermCount[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [activeTab, setActiveTab] = useState<"cloud" | "table">("cloud")
   const { toast } = useToast()
+
+  // Update character counts when text changes
+  useEffect(() => {
+    setResponsibilitiesChars(responsibilities.length)
+  }, [responsibilities])
+
+  useEffect(() => {
+    setQualificationsChars(qualifications.length)
+  }, [qualifications])
+
+  const handleResponsibilitiesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setResponsibilities(value)
+  }
+
+  const handleQualificationsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setQualifications(value)
+  }
+
+  const getCharacterCountColor = (count: number) => {
+    const remaining = CHARACTER_LIMIT - count
+    if (remaining < 0) return "text-destructive"
+    if (remaining < CHARACTER_LIMIT * 0.1) return "text-amber-500" // Less than 10% remaining
+    return "text-muted-foreground"
+  }
+
+  const getProgressColor = (count: number) => {
+    const remaining = CHARACTER_LIMIT - count
+    if (remaining < 0) return "bg-destructive"
+    if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500" // Less than 10% remaining
+    return "bg-primary"
+  }
+
+  const getProgressValue = (count: number) => {
+    const percentage = (count / CHARACTER_LIMIT) * 100
+    return Math.min(percentage, 100) // Cap at 100% for the progress bar
+  }
+
+  const isOverLimit = (count: number) => {
+    return count > CHARACTER_LIMIT
+  }
+
+  const getRemainingChars = (count: number) => {
+    return CHARACTER_LIMIT - count
+  }
 
   const addToCloud = async () => {
     if (!responsibilities.trim() && !qualifications.trim()) {
       toast({
         title: "No content provided",
         description: "Please add some job listing content to analyze.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Check if either input exceeds the character limit
+    if (isOverLimit(responsibilitiesChars) || isOverLimit(qualificationsChars)) {
+      toast({
+        title: "Character limit exceeded",
+        description: "Please reduce the text to fit within the 650 character limit.",
         variant: "destructive",
       })
       return
@@ -177,9 +240,7 @@ export function TermsSkillsGenerator() {
       <Card>
         <CardHeader>
           <CardTitle>Job Listing Information</CardTitle>
-          <CardDescription>
-            Enter company and role information about the job listing
-          </CardDescription>
+          <CardDescription>Enter company and role information about the job listing</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
@@ -206,7 +267,7 @@ export function TermsSkillsGenerator() {
       </Card>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Card>
+        <Card className={isOverLimit(responsibilitiesChars) ? "border-destructive" : ""}>
           <CardHeader>
             <CardTitle>What You Will Do</CardTitle>
             <CardDescription>Paste job responsibilities here</CardDescription>
@@ -214,14 +275,33 @@ export function TermsSkillsGenerator() {
           <CardContent>
             <Textarea
               placeholder="Copy and paste the 'Responsibilities' or 'What You Will Do' section from job listings..."
-              className="min-h-[200px]"
+              className={`min-h-[200px] ${isOverLimit(responsibilitiesChars) ? "border-destructive" : ""}`}
               value={responsibilities}
-              onChange={(e) => setResponsibilities(e.target.value)}
+              onChange={handleResponsibilitiesChange}
             />
           </CardContent>
+          <CardFooter className="flex flex-col items-start pt-0">
+            <div className="w-full">
+              <Progress
+                value={getProgressValue(responsibilitiesChars)}
+                className="h-1 mb-1"
+                indicatorClassName={getProgressColor(responsibilitiesChars)}
+              />
+            </div>
+            <div className={`text-xs ${getCharacterCountColor(responsibilitiesChars)}`}>
+              {isOverLimit(responsibilitiesChars) ? (
+                <span className="flex items-center text-destructive font-medium">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {getRemainingChars(responsibilitiesChars)} characters over limit
+                </span>
+              ) : (
+                `${responsibilitiesChars} / ${CHARACTER_LIMIT} characters`
+              )}
+            </div>
+          </CardFooter>
         </Card>
 
-        <Card>
+        <Card className={isOverLimit(qualificationsChars) ? "border-destructive" : ""}>
           <CardHeader>
             <CardTitle>Preferred Skills</CardTitle>
             <CardDescription>Paste job qualifications here</CardDescription>
@@ -229,11 +309,30 @@ export function TermsSkillsGenerator() {
           <CardContent>
             <Textarea
               placeholder="Copy and paste the 'Qualifications' or 'Preferred Skills' section from job listings..."
-              className="min-h-[200px]"
+              className={`min-h-[200px] ${isOverLimit(qualificationsChars) ? "border-destructive" : ""}`}
               value={qualifications}
-              onChange={(e) => setQualifications(e.target.value)}
+              onChange={handleQualificationsChange}
             />
           </CardContent>
+          <CardFooter className="flex flex-col items-start pt-0">
+            <div className="w-full">
+              <Progress
+                value={getProgressValue(qualificationsChars)}
+                className="h-1 mb-1"
+                indicatorClassName={getProgressColor(qualificationsChars)}
+              />
+            </div>
+            <div className={`text-xs ${getCharacterCountColor(qualificationsChars)}`}>
+              {isOverLimit(qualificationsChars) ? (
+                <span className="flex items-center text-destructive font-medium">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {getRemainingChars(qualificationsChars)} characters over limit
+                </span>
+              ) : (
+                `${qualificationsChars} / ${CHARACTER_LIMIT} characters`
+              )}
+            </div>
+          </CardFooter>
         </Card>
       </div>
 
@@ -241,7 +340,12 @@ export function TermsSkillsGenerator() {
         <Button
           size="lg"
           onClick={addToCloud}
-          disabled={isAnalyzing || (!responsibilities.trim() && !qualifications.trim())}
+          disabled={
+            isAnalyzing ||
+            (!responsibilities.trim() && !qualifications.trim()) ||
+            isOverLimit(responsibilitiesChars) ||
+            isOverLimit(qualificationsChars)
+          }
         >
           {isAnalyzing ? (
             <>

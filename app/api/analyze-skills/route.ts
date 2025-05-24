@@ -1,15 +1,12 @@
-import { NextResponse } from "next/server";
-import { jsonrepair } from "jsonrepair";
+import { NextResponse } from "next/server"
+import { jsonrepair } from "jsonrepair"
 
 export async function POST(request: Request) {
   try {
-    const { responsibilities, qualifications } = await request.json();
+    const { responsibilities, qualifications } = await request.json()
 
     if (!responsibilities && !qualifications) {
-      return NextResponse.json(
-        { error: "No content provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No content provided" }, { status: 400 })
     }
 
     const content = `
@@ -18,7 +15,7 @@ ${responsibilities || "None provided"}
 
 QUALIFICATIONS:
 ${qualifications || "None provided"}
-`;
+`
 
     const prompt = `
 You are a specialized job listing analyzer. I have a list of job responsibilities and qualifications here. Extract the various responsibilities and qualifications into strings of 2-3 words.
@@ -122,79 +119,64 @@ EXAMPLE OUTPUT #2:
 
 NOW ANALYZE THIS JOB LISTING CONTENT:
 ${content}
-`;
+`
 
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.1,
-        }),
-      }
-    );
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.1,
+      }),
+    })
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Groq API error:", errorData);
-      return NextResponse.json(
-        { error: "Error calling Groq API" },
-        { status: response.status }
-      );
+      const errorData = await response.json()
+      console.error("Groq API error:", errorData)
+      return NextResponse.json({ error: "Error calling Groq API" }, { status: response.status })
     }
 
-    const data = await response.json();
+    const data = await response.json()
 
     try {
-      const content = data.choices[0].message.content;
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      const jsonString = jsonMatch ? jsonMatch[0] : "{}";
+      const content = data.choices[0].message.content
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      const jsonString = jsonMatch ? jsonMatch[0] : "{}"
 
       // Attempt to repair the JSON string
-      const repairedJsonString = jsonrepair(jsonString);
+      const repairedJsonString = jsonrepair(jsonString)
 
       // Parse the repaired JSON string
-      const parsedData = JSON.parse(repairedJsonString);
+      const parsedData = JSON.parse(repairedJsonString)
 
       // Validate and sanitize the terms
       if (parsedData.terms && Array.isArray(parsedData.terms)) {
         parsedData.terms = parsedData.terms.map((term: any) => ({
           term: String(term.term || "Unknown Term"),
           count: typeof term.count === "number" ? term.count : 1,
-          category:
-            term.category === "responsibilities"
-              ? "responsibilities"
-              : "qualifications",
-        }));
+          category: term.category === "responsibilities" ? "responsibilities" : "qualifications",
+        }))
       } else {
-        parsedData.terms = [];
+        parsedData.terms = []
       }
 
-      return NextResponse.json(parsedData);
+      return NextResponse.json(parsedData)
     } catch (error) {
-      console.error("Error parsing Groq response:", error);
-      console.log("Raw response:", data.choices[0].message.content);
-      return NextResponse.json(
-        { error: "Error parsing Groq response" },
-        { status: 500 }
-      );
+      console.error("Error parsing Groq response:", error)
+      console.log("Raw response:", data.choices[0].message.content)
+      return NextResponse.json({ error: "Error parsing Groq response" }, { status: 500 })
     }
   } catch (error) {
-    console.error("Server error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Server error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

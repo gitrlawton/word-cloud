@@ -60,14 +60,14 @@ export function TermsSkillsGenerator() {
 
   const getCharacterCountColor = (count: number) => {
     const remaining = CHARACTER_LIMIT - count
-    if (remaining < 0) return "text-destructive"
+    if (remaining <= 0) return "text-destructive"
     if (remaining < CHARACTER_LIMIT * 0.1) return "text-amber-500" // Less than 10% remaining
     return "text-muted-foreground"
   }
 
   const getProgressColor = (count: number) => {
     const remaining = CHARACTER_LIMIT - count
-    if (remaining < 0) return "bg-destructive"
+    if (remaining <= 0) return "bg-destructive"
     if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500" // Less than 10% remaining
     return "bg-primary"
   }
@@ -279,7 +279,7 @@ export function TermsSkillsGenerator() {
           <CardContent>
             <Textarea
               placeholder="Copy and paste the 'Responsibilities' or 'What You Will Do' section from job listings..."
-              className={`min-h-[200px] ${isOverLimit(responsibilitiesChars) ? "border-destructive" : ""}`}
+              className={`min-h-[200px] resize-none ${isOverLimit(responsibilitiesChars) ? "border-destructive" : ""}`}
               value={responsibilities}
               onChange={handleResponsibilitiesChange}
             />
@@ -296,7 +296,7 @@ export function TermsSkillsGenerator() {
               {isOverLimit(responsibilitiesChars) ? (
                 <span className="flex items-center text-destructive font-medium">
                   <AlertCircle className="h-3 w-3 mr-1" />
-                  {getRemainingChars(responsibilitiesChars)} characters over limit
+                  {Math.abs(getRemainingChars(responsibilitiesChars))} characters over limit
                 </span>
               ) : (
                 `${responsibilitiesChars} / ${CHARACTER_LIMIT} characters`
@@ -313,7 +313,7 @@ export function TermsSkillsGenerator() {
           <CardContent>
             <Textarea
               placeholder="Copy and paste the 'Qualifications' or 'Preferred Skills' section from job listings..."
-              className={`min-h-[200px] ${isOverLimit(qualificationsChars) ? "border-destructive" : ""}`}
+              className={`min-h-[200px] resize-none ${isOverLimit(qualificationsChars) ? "border-destructive" : ""}`}
               value={qualifications}
               onChange={handleQualificationsChange}
             />
@@ -330,7 +330,7 @@ export function TermsSkillsGenerator() {
               {isOverLimit(qualificationsChars) ? (
                 <span className="flex items-center text-destructive font-medium">
                   <AlertCircle className="h-3 w-3 mr-1" />
-                  {getRemainingChars(qualificationsChars)} characters over limit
+                  {Math.abs(getRemainingChars(qualificationsChars))} characters over limit
                 </span>
               ) : (
                 `${qualificationsChars} / ${CHARACTER_LIMIT} characters`

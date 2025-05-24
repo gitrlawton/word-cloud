@@ -20,8 +20,12 @@ interface TermsTableProps {
   terms: TermCount[]
 }
 
+type SortField = "term" | "count"
+type SortOrder = "asc" | "desc"
+
 export function TermsTable({ terms }: TermsTableProps) {
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [sortField, setSortField] = useState<SortField>("count")
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
   const [filterValue, setFilterValue] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<"all" | "responsibilities" | "qualifications">("all")
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
@@ -93,14 +97,27 @@ export function TermsTable({ terms }: TermsTableProps) {
 
   const sortedTerms = useMemo(() => {
     return [...filteredTerms].sort((a, b) => {
-      const countA = typeof a.count === "number" ? a.count : 0
-      const countB = typeof b.count === "number" ? b.count : 0
-      return sortOrder === "asc" ? countA - countB : countB - countA
+      if (sortField === "term") {
+        const termA = String(a.term).toLowerCase()
+        const termB = String(b.term).toLowerCase()
+        return sortOrder === "asc" ? termA.localeCompare(termB) : termB.localeCompare(termA)
+      } else {
+        const countA = typeof a.count === "number" ? a.count : 0
+        const countB = typeof b.count === "number" ? b.count : 0
+        return sortOrder === "asc" ? countA - countB : countB - countA
+      }
     })
-  }, [filteredTerms, sortOrder])
+  }, [filteredTerms, sortField, sortOrder])
 
-  const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // If clicking the same field, toggle the order
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      // If clicking a different field, set it as the sort field with default order
+      setSortField(field)
+      setSortOrder(field === "term" ? "asc" : "desc") // Default to asc for terms, desc for count
+    }
   }
 
   const toggleRowExpanded = (termKey: string) => {
@@ -223,10 +240,25 @@ export function TermsTable({ terms }: TermsTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]"></TableHead>
-              <TableHead className="min-w-[200px]">Term</TableHead>
+              <TableHead className="min-w-[200px]">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSort("term")}
+                  className="font-medium h-auto p-0 hover:bg-transparent"
+                >
+                  Term
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
               <TableHead className="w-[150px]">Category</TableHead>
               <TableHead className="w-[100px]">
-                <Button variant="ghost" size="sm" onClick={toggleSortOrder} className="font-medium">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleSort("count")}
+                  className="font-medium h-auto p-0 hover:bg-transparent"
+                >
                   Count
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>

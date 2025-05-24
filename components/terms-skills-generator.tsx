@@ -234,6 +234,10 @@ export function TermsSkillsGenerator() {
     }, 0)
   }
 
+  // Calculate counts by category
+  const responsibilitiesCount = termsData.filter((term) => term.category === "responsibilities").length
+  const skillsCount = termsData.filter((term) => term.category === "qualifications").length
+
   return (
     <div className="grid gap-6">
       {/* Job Listing Information Card */}
@@ -372,7 +376,8 @@ export function TermsSkillsGenerator() {
           <CardHeader>
             <CardTitle>Terms & Skills Cloud</CardTitle>
             <CardDescription>
-              Showing {termsData.length} unique terms from {calculateTotalMentions()} total mentions
+              Showing {termsData.length} unique terms ({responsibilitiesCount} responsibilities, {skillsCount} skills)
+              from {calculateTotalMentions()} total mentions
             </CardDescription>
             <Tabs defaultValue="cloud" onValueChange={(value) => setActiveTab(value as "cloud" | "table")}>
               <TabsList className="grid w-[400px] grid-cols-2">

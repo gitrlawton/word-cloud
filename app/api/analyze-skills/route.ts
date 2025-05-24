@@ -45,7 +45,7 @@ IMPORTANT RULES:
 - Ensure the JSON is valid and properly formatted.
 - Make sure all counts are numeric values, not objects or strings.
 
-EXAMPLE INPUT:
+EXAMPLE INPUT #1:
 
 RESPONSIBILITIES:
 Understand and lead the analysis of the competitive environment, customers, and product metrics to determine the right feature set to drive engagement and usage on LinkedIn  
@@ -54,7 +54,7 @@ Develop a comprehensive product roadmap to deliver on the business goals for Lin
 Work with the product development team and other cross-functional team members to bring features live to the site  
 Clearly communicate product benefits to our users and internal stakeholders  
 
-EXAMPLE OUTPUT:
+EXAMPLE OUTPUT #1:
 {
   "terms": [
     {"term": "competitive analysis", "count": 1, "category": "responsibilities"},
@@ -75,6 +75,48 @@ EXAMPLE OUTPUT:
     {"term": "product launch support", "count": 1, "category": "responsibilities"},
     {"term": "product benefit communication", "count": 1, "category": "responsibilities"},
     {"term": "stakeholder communication", "count": 1, "category": "responsibilities"}
+  ]
+}
+
+EXAMPLE INPUT #2:
+
+QUALIFICATIONS:
+Currently enrolled in a college or university program and returning to school the term following your summer internship  
+One of the two qualifications below:  
+Currently pursuing a B.A./B.S. degree in a technical or product-related discipline  
+Currently pursuing an MBA AND have a technical or product-related undergraduate degree  
+One of the two qualifications below:  
+Proven experience in entrepreneurship by founding a club, starting a company, or creating an app or product.  
+Completed a product management internship, software engineering internship or fellowship with a venture capital/entrepreneurial organization.  
+Leader of a club/group on campus.  
+Earned a scholarship.  
+Product management experience.  
+Internship experience at a software-based company.  
+Experience in venture capital.  
+Experience as a founder.  
+
+EXAMPLE OUTPUT #2:
+{
+  "terms": [
+    {"term": "college enrollment", "count": 1, "category": "qualifications"},
+    {"term": "returning student", "count": 1, "category": "qualifications"},
+    {"term": "campus leadership", "count": 1, "category": "qualifications"},
+    {"term": "scholarship recipient", "count": 1, "category": "qualifications"},
+    {"term": "product management experience", "count": 1, "category": "qualifications"},
+    {"term": "internship experience", "count": 1, "category": "qualifications"},
+    {"term": "software company internship", "count": 1, "category": "qualifications"},
+    {"term": "venture capital experience", "count": 1, "category": "qualifications"},
+    {"term": "founder experience", "count": 1, "category": "qualifications"},
+    {"term": "technical degree pursuit", "count": 1, "category": "qualifications"},
+    {"term": "product-related degree", "count": 1, "category": "qualifications"},
+    {"term": "MBA candidacy", "count": 1, "category": "qualifications"},
+    {"term": "entrepreneurial experience", "count": 1, "category": "qualifications"},
+    {"term": "club founder", "count": 1, "category": "qualifications"},
+    {"term": "app creation experience", "count": 1, "category": "qualifications"},
+    {"term": "company founder", "count": 1, "category": "qualifications"},
+    {"term": "product management internship", "count": 1, "category": "qualifications"},
+    {"term": "software engineering internship", "count": 1, "category": "qualifications"},
+    {"term": "venture fellowship experience", "count": 1, "category": "qualifications"}
   ]
 }
 

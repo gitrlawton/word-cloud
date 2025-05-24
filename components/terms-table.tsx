@@ -4,9 +4,10 @@ import { useState, useMemo } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ChevronDown, ChevronUp, Search, Building, Briefcase, Filter } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { ArrowUpDown, ChevronDown, Search, Building, Briefcase, Filter } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { motion, AnimatePresence } from "framer-motion"
 import type { TermCount } from "./terms-skills-generator"
 import {
   DropdownMenu,
@@ -102,10 +103,10 @@ export function TermsTable({ terms }: TermsTableProps) {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
   }
 
-  const toggleRowExpanded = (term: string) => {
+  const toggleRowExpanded = (termKey: string) => {
     setExpandedRows((prev) => ({
       ...prev,
-      [term]: !prev[term],
+      [termKey]: !prev[termKey],
     }))
   }
 
@@ -217,13 +218,13 @@ export function TermsTable({ terms }: TermsTableProps) {
         </div>
       </div>
 
-      <div className="border rounded-md overflow-x-auto">
+      <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]"></TableHead>
-              <TableHead>Term</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead className="min-w-[200px]">Term</TableHead>
+              <TableHead className="w-[150px]">Category</TableHead>
               <TableHead className="w-[100px]">
                 <Button variant="ghost" size="sm" onClick={toggleSortOrder} className="font-medium">
                   Count
@@ -240,60 +241,102 @@ export function TermsTable({ terms }: TermsTableProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              sortedTerms.map((term, index) => (
-                <Collapsible
-                  key={index}
-                  open={expandedRows[term.term]}
-                  onOpenChange={() => toggleRowExpanded(term.term)}
-                  asChild
-                >
-                  <>
-                    <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => toggleRowExpanded(term.term)}>
-                      <TableCell>
-                        <CollapsibleTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            {expandedRows[term.term] ? (
-                              <ChevronUp className="h-4 w-4" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4" />
-                            )}
-                            <span className="sr-only">Toggle details</span>
-                          </Button>
-                        </CollapsibleTrigger>
-                      </TableCell>
-                      <TableCell className="font-medium">{term.term}</TableCell>
-                      <TableCell>
-                        <span className={term.category === "responsibilities" ? "text-primary" : "text-destructive"}>
-                          {term.category === "responsibilities" ? "Responsibility" : "Qualification"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">{term.count}</TableCell>
-                    </TableRow>
-                    <CollapsibleContent asChild>
-                      <TableRow>
-                        <TableCell colSpan={4} className="bg-muted/30 p-4">
-                          <div className="text-sm">
-                            <h4 className="font-semibold mb-2">Companies & Roles:</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {term.sources && term.sources.length > 0 ? (
-                                term.sources.map((source, idx) => (
-                                  <Badge key={idx} variant="outline" className="px-2 py-1">
-                                    {source && typeof source === "object"
-                                      ? `${String(source.company || "Unknown Company")} - ${String(source.role || "Unknown Role")}`
-                                      : "Unknown Source"}
-                                  </Badge>
-                                ))
-                              ) : (
-                                <span className="text-muted-foreground">No source information available</span>
-                              )}
-                            </div>
+              sortedTerms.map((term, index) => {
+                const termKey = `${term.term}-${index}`
+                const isExpanded = expandedRows[termKey]
+
+                return (
+                  <motion.tr
+                    key={termKey}
+                    layout
+                    className="group"
+                    initial={false}
+                    animate={{
+                      backgroundColor: isExpanded ? "hsl(var(--muted))" : "transparent",
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <TableCell colSpan={4} className="p-0">
+                      <div className="relative">
+                        {/* Main row content */}
+                        <div
+                          className="grid grid-cols-[40px_1fr_150px_100px] items-center cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => toggleRowExpanded(termKey)}
+                        >
+                          <div className="flex justify-center py-4">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                                <ChevronDown className="h-4 w-4" />
+                              </motion.div>
+                              <span className="sr-only">Toggle details</span>
+                            </Button>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    </CollapsibleContent>
-                  </>
-                </Collapsible>
-              ))
+                          <div className="py-4 px-4 font-medium text-left">{term.term}</div>
+                          <div className="py-4 px-4 text-left">
+                            <span
+                              className={term.category === "responsibilities" ? "text-primary" : "text-destructive"}
+                            >
+                              {term.category === "responsibilities" ? "Responsibility" : "Skill"}
+                            </span>
+                          </div>
+                          <div className="py-4 px-4 text-left">{term.count}</div>
+                        </div>
+
+                        {/* Expanded content */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-4 pb-4">
+                                <Card className="border-l-4 border-l-primary/20 bg-background/50">
+                                  <CardContent className="p-4">
+                                    <motion.div
+                                      initial={{ y: -10, opacity: 0 }}
+                                      animate={{ y: 0, opacity: 1 }}
+                                      transition={{ delay: 0.1, duration: 0.2 }}
+                                    >
+                                      <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
+                                        Companies & Roles
+                                      </h4>
+                                      <div className="flex flex-wrap gap-2">
+                                        {term.sources && term.sources.length > 0 ? (
+                                          term.sources.map((source, idx) => (
+                                            <motion.div
+                                              key={idx}
+                                              initial={{ scale: 0.8, opacity: 0 }}
+                                              animate={{ scale: 1, opacity: 1 }}
+                                              transition={{ delay: 0.1 + idx * 0.05, duration: 0.2 }}
+                                            >
+                                              <Badge variant="outline" className="px-3 py-1">
+                                                {source && typeof source === "object"
+                                                  ? `${String(source.company || "Unknown Company")} - ${String(source.role || "Unknown Role")}`
+                                                  : "Unknown Source"}
+                                              </Badge>
+                                            </motion.div>
+                                          ))
+                                        ) : (
+                                          <span className="text-muted-foreground text-sm">
+                                            No source information available
+                                          </span>
+                                        )}
+                                      </div>
+                                    </motion.div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </TableCell>
+                  </motion.tr>
+                )
+              })
             )}
           </TableBody>
         </Table>

@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { TermsCloud } from "@/components/terms-cloud"
 import { TermsTable } from "@/components/terms-table"
 import { useToast } from "@/hooks/use-toast"
-import { PlusCircle, RotateCw, AlertCircle } from "lucide-react"
+import { PlusCircle, RotateCw, AlertCircle, Building, Briefcase } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 
@@ -60,21 +60,21 @@ export function TermsSkillsGenerator() {
 
   const getCharacterCountColor = (count: number) => {
     const remaining = CHARACTER_LIMIT - count
-    if (remaining <= 0) return "text-destructive"
-    if (remaining < CHARACTER_LIMIT * 0.1) return "text-amber-500" // Less than 10% remaining
-    return "text-muted-foreground"
+    if (remaining <= 0) return "text-red-600"
+    if (remaining < CHARACTER_LIMIT * 0.1) return "text-amber-600"
+    return "text-slate-500"
   }
 
   const getProgressColor = (count: number) => {
     const remaining = CHARACTER_LIMIT - count
-    if (remaining <= 0) return "bg-destructive"
-    if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500" // Less than 10% remaining
-    return "bg-primary"
+    if (remaining <= 0) return "bg-red-500"
+    if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500"
+    return "bg-blue-500"
   }
 
   const getProgressValue = (count: number) => {
     const percentage = (count / CHARACTER_LIMIT) * 100
-    return Math.min(percentage, 100) // Cap at 100% for the progress bar
+    return Math.min(percentage, 100)
   }
 
   const isOverLimit = (count: number) => {
@@ -95,7 +95,6 @@ export function TermsSkillsGenerator() {
       return
     }
 
-    // Check if either input exceeds the character limit
     if (isOverLimit(responsibilitiesChars) || isOverLimit(qualificationsChars)) {
       toast({
         title: "Character limit exceeded",
@@ -129,7 +128,6 @@ export function TermsSkillsGenerator() {
         throw new Error("Invalid response format")
       }
 
-      // Add source information to terms
       const sourceInfo = {
         company: company.trim() || "Unknown Company",
         role: role.trim() || "Unknown Role",
@@ -137,11 +135,10 @@ export function TermsSkillsGenerator() {
 
       const termsWithSource = data.terms.map((term: TermCount) => ({
         ...term,
-        count: typeof term.count === "number" ? term.count : 1, // Ensure count is a number
+        count: typeof term.count === "number" ? term.count : 1,
         sources: [sourceInfo],
       }))
 
-      // Merge new terms with existing terms
       const updatedTerms = mergeTerms(termsData, termsWithSource)
       setTermsData(updatedTerms)
 
@@ -150,10 +147,8 @@ export function TermsSkillsGenerator() {
         description: `Added ${data.terms.length} terms to your cloud.`,
       })
 
-      // Clear the input fields
       setResponsibilities("")
       setQualifications("")
-      // Clear company and role as well
       setCompany("")
       setRole("")
     } catch (error) {
@@ -171,27 +166,23 @@ export function TermsSkillsGenerator() {
   const mergeTerms = (existingTerms: TermCount[], newTerms: TermCount[]): TermCount[] => {
     const termMap = new Map<string, TermCount>()
 
-    // Add existing terms to the map
     existingTerms.forEach((term) => {
       termMap.set(term.term, {
         ...term,
-        count: typeof term.count === "number" ? term.count : 1, // Ensure count is a number
+        count: typeof term.count === "number" ? term.count : 1,
       })
     })
 
-    // Merge new terms
     newTerms.forEach((newTerm) => {
       const existingTerm = termMap.get(newTerm.term)
 
       if (existingTerm) {
-        // Update count if term already exists
         const existingCount = typeof existingTerm.count === "number" ? existingTerm.count : 0
         const newCount = typeof newTerm.count === "number" ? newTerm.count : 1
 
         termMap.set(newTerm.term, {
           ...existingTerm,
           count: existingCount + newCount,
-          // Merge sources arrays, avoiding duplicates
           sources: [
             ...(existingTerm.sources || []),
             ...(newTerm.sources || []).filter(
@@ -204,15 +195,13 @@ export function TermsSkillsGenerator() {
           ],
         })
       } else {
-        // Add new term
         termMap.set(newTerm.term, {
           ...newTerm,
-          count: typeof newTerm.count === "number" ? newTerm.count : 1, // Ensure count is a number
+          count: typeof newTerm.count === "number" ? newTerm.count : 1,
         })
       }
     })
 
-    // Convert map back to array and sort by count
     return Array.from(termMap.values()).sort((a, b) => b.count - a.count)
   }
 
@@ -226,7 +215,6 @@ export function TermsSkillsGenerator() {
     })
   }
 
-  // Calculate total mentions safely
   const calculateTotalMentions = () => {
     return termsData.reduce((sum, term) => {
       const count = typeof term.count === "number" ? term.count : 0
@@ -234,68 +222,91 @@ export function TermsSkillsGenerator() {
     }, 0)
   }
 
-  // Calculate counts by category
   const responsibilitiesCount = termsData.filter((term) => term.category === "responsibilities").length
   const skillsCount = termsData.filter((term) => term.category === "qualifications").length
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8 max-w-7xl mx-auto">
       {/* Job Listing Information Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Job Listing Information</CardTitle>
-          <CardDescription>Enter company and role information about the job listing</CardDescription>
+      <Card className="bg-white border-slate-300 shadow-xl rounded">
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-300">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Building className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <CardTitle className="text-slate-800">Job Listing Information</CardTitle>
+              <CardDescription className="text-slate-600">
+                Enter company and role information about the job listing
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="company">Company (Optional)</Label>
+        <CardContent className="p-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="company" className="text-slate-700 font-medium">
+                Company (Optional)
+              </Label>
               <Input
                 id="company"
                 placeholder="Enter company name"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
+                className="border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role (Optional)</Label>
+            <div className="space-y-3">
+              <Label htmlFor="role" className="text-slate-700 font-medium">
+                Role (Optional)
+              </Label>
               <Input
                 id="role"
                 placeholder="Enter job role/title"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
+                className="border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white"
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className={isOverLimit(responsibilitiesChars) ? "border-destructive" : ""}>
-          <CardHeader>
-            <CardTitle>What You Will Do</CardTitle>
-            <CardDescription>Paste job responsibilities here</CardDescription>
+      <div className="grid md:grid-cols-2 gap-8">
+        <Card
+          className={`bg-white border-slate-300 shadow-xl ${isOverLimit(responsibilitiesChars) ? "border-red-300 shadow-red-100" : ""}`}
+        >
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Briefcase className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle className="text-slate-800">What You Will Do</CardTitle>
+                <CardDescription className="text-slate-600">Paste job responsibilities here</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <Textarea
               placeholder="Copy and paste the 'Responsibilities' or 'What You Will Do' section from job listings..."
-              className={`min-h-[200px] resize-none ${isOverLimit(responsibilitiesChars) ? "border-destructive" : ""}`}
+              className={`min-h-[200px] resize-none border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white ${isOverLimit(responsibilitiesChars) ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : ""}`}
               value={responsibilities}
               onChange={handleResponsibilitiesChange}
             />
           </CardContent>
-          <CardFooter className="flex flex-col items-start pt-0">
+          <CardFooter className="flex flex-col items-start pt-0 pb-6 px-6">
             <div className="w-full">
               <Progress
                 value={getProgressValue(responsibilitiesChars)}
-                className="h-1 mb-1"
+                className="h-2 mb-2 bg-slate-100"
                 indicatorClassName={getProgressColor(responsibilitiesChars)}
               />
             </div>
-            <div className={`text-xs ${getCharacterCountColor(responsibilitiesChars)}`}>
+            <div className={`text-sm font-medium ${getCharacterCountColor(responsibilitiesChars)}`}>
               {isOverLimit(responsibilitiesChars) ? (
-                <span className="flex items-center text-destructive font-medium">
-                  <AlertCircle className="h-3 w-3 mr-1" />
+                <span className="flex items-center text-red-600 font-semibold">
+                  <AlertCircle className="h-4 w-4 mr-2" />
                   {Math.abs(getRemainingChars(responsibilitiesChars))} characters over limit
                 </span>
               ) : (
@@ -305,31 +316,40 @@ export function TermsSkillsGenerator() {
           </CardFooter>
         </Card>
 
-        <Card className={isOverLimit(qualificationsChars) ? "border-destructive" : ""}>
-          <CardHeader>
-            <CardTitle>Preferred Skills</CardTitle>
-            <CardDescription>Paste job qualifications here</CardDescription>
+        <Card
+          className={`bg-white border-slate-300 shadow-xl ${isOverLimit(qualificationsChars) ? "border-red-300 shadow-red-100" : ""}`}
+        >
+          <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <Briefcase className="h-5 w-5 text-indigo-600" />
+              </div>
+              <div>
+                <CardTitle className="text-slate-800">Preferred Skills</CardTitle>
+                <CardDescription className="text-slate-600">Paste job qualifications here</CardDescription>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <Textarea
               placeholder="Copy and paste the 'Qualifications' or 'Preferred Skills' section from job listings..."
-              className={`min-h-[200px] resize-none ${isOverLimit(qualificationsChars) ? "border-destructive" : ""}`}
+              className={`min-h-[200px] resize-none border-slate-200 focus:border-indigo-400 focus:ring-indigo-400/20 bg-white ${isOverLimit(qualificationsChars) ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : ""}`}
               value={qualifications}
               onChange={handleQualificationsChange}
             />
           </CardContent>
-          <CardFooter className="flex flex-col items-start pt-0">
+          <CardFooter className="flex flex-col items-start pt-0 pb-6 px-6">
             <div className="w-full">
               <Progress
                 value={getProgressValue(qualificationsChars)}
-                className="h-1 mb-1"
+                className="h-2 mb-2 bg-slate-100"
                 indicatorClassName={getProgressColor(qualificationsChars)}
               />
             </div>
-            <div className={`text-xs ${getCharacterCountColor(qualificationsChars)}`}>
+            <div className={`text-sm font-medium ${getCharacterCountColor(qualificationsChars)}`}>
               {isOverLimit(qualificationsChars) ? (
-                <span className="flex items-center text-destructive font-medium">
-                  <AlertCircle className="h-3 w-3 mr-1" />
+                <span className="flex items-center text-red-600 font-semibold">
+                  <AlertCircle className="h-4 w-4 mr-2" />
                   {Math.abs(getRemainingChars(qualificationsChars))} characters over limit
                 </span>
               ) : (
@@ -340,7 +360,7 @@ export function TermsSkillsGenerator() {
         </Card>
       </div>
 
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-6">
         <Button
           size="lg"
           onClick={addToCloud}
@@ -350,44 +370,58 @@ export function TermsSkillsGenerator() {
             isOverLimit(responsibilitiesChars) ||
             isOverLimit(qualificationsChars)
           }
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
         >
           {isAnalyzing ? (
             <>
-              <RotateCw className="mr-2 h-4 w-4 animate-spin" />
+              <RotateCw className="mr-3 h-5 w-5 animate-spin" />
               Analyzing...
             </>
           ) : (
             <>
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle className="mr-3 h-5 w-5" />
               Add to Cloud
             </>
           )}
         </Button>
 
         {termsData.length > 0 && (
-          <Button size="lg" variant="outline" onClick={resetCloud}>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={resetCloud}
+            className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
+          >
             Reset Cloud
           </Button>
         )}
       </div>
 
       {termsData.length > 0 && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Terms & Skills Cloud</CardTitle>
-            <CardDescription>
+        <Card className="bg-white border-slate-300 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300">
+            <CardTitle className="text-slate-800 text-2xl">Terms & Skills Cloud</CardTitle>
+            <CardDescription className="text-slate-600 text-lg">
               Showing {termsData.length} unique terms ({responsibilitiesCount} responsibilities, {skillsCount} skills)
               from {calculateTotalMentions()} total mentions
             </CardDescription>
-            <Tabs defaultValue="cloud" onValueChange={(value) => setActiveTab(value as "cloud" | "table")}>
-              <TabsList className="grid w-[400px] grid-cols-2">
-                <TabsTrigger value="cloud">Cloud View</TabsTrigger>
-                <TabsTrigger value="table">Table View</TabsTrigger>
+            <Tabs
+              defaultValue="cloud"
+              onValueChange={(value) => setActiveTab(value as "cloud" | "table")}
+              className="mt-6"
+            >
+              <TabsList className="grid w-[400px] grid-cols-2 bg-slate-100 p-1 border border-slate-300">
+                <TabsTrigger value="cloud" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  Cloud View
+                </TabsTrigger>
+                <TabsTrigger value="table" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                  Table View
+                </TabsTrigger>
               </TabsList>
-              <TabsContent value="cloud" className="mt-6">
+              <TabsContent value="cloud" className="mt-8">
                 <TermsCloud terms={termsData} />
               </TabsContent>
-              <TabsContent value="table" className="mt-6">
+              <TabsContent value="table" className="mt-8">
                 <TermsTable terms={termsData} />
               </TabsContent>
             </Tabs>

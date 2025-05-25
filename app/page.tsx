@@ -2,12 +2,25 @@ import { TermsSkillsGenerator } from "@/components/terms-skills-generator"
 
 export default function Home() {
   return (
-    <main className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold text-center mb-2">Skill Cloud Generator</h1>
-      <p className="text-center text-muted-foreground mb-8">
-        Analyze job listings to uncover the most in-demand skills
-      </p>
-      <TermsSkillsGenerator />
-    </main>
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
+      {/* Header */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              Terms & Skills Cloud
+            </h1>
+            <p className="text-slate-600 mt-2 text-lg">
+              Analyze job listings to discover the most in-demand skills and responsibilities
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <TermsSkillsGenerator />
+      </div>
+    </div>
   )
 }

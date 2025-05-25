@@ -32,7 +32,6 @@ export function TermsTable({ terms }: TermsTableProps) {
   const [companyFilter, setCompanyFilter] = useState<string | null>(null)
   const [roleFilter, setRoleFilter] = useState<string | null>(null)
 
-  // Ensure all terms have valid properties
   const sanitizedTerms = useMemo(() => {
     return terms.map((term) => ({
       ...term,
@@ -43,7 +42,6 @@ export function TermsTable({ terms }: TermsTableProps) {
     }))
   }, [terms])
 
-  // Extract unique companies and roles from all terms
   const { companies, roles } = useMemo(() => {
     const companiesSet = new Set<string>()
     const rolesSet = new Set<string>()
@@ -65,16 +63,11 @@ export function TermsTable({ terms }: TermsTableProps) {
     }
   }, [sanitizedTerms])
 
-  // Filter and sort the terms
   const filteredTerms = useMemo(() => {
     return sanitizedTerms.filter((term) => {
-      // Text search filter
       const matchesSearch = String(term.term).toLowerCase().includes(filterValue.toLowerCase())
-
-      // Category filter
       const matchesCategory = categoryFilter === "all" || term.category === categoryFilter
 
-      // Company and role filters
       let matchesCompany = true
       let matchesRole = true
 
@@ -111,12 +104,10 @@ export function TermsTable({ terms }: TermsTableProps) {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      // If clicking the same field, toggle the order
       setSortOrder(sortOrder === "asc" ? "desc" : "asc")
     } else {
-      // If clicking a different field, set it as the sort field with default order
       setSortField(field)
-      setSortOrder(field === "term" ? "asc" : "desc") // Default to asc for terms, desc for count
+      setSortOrder(field === "term" ? "asc" : "desc")
     }
   }
 
@@ -135,15 +126,14 @@ export function TermsTable({ terms }: TermsTableProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-col space-y-4">
-        {/* Search and category filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input
               placeholder="Filter terms..."
-              className="pl-8"
+              className="pl-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white/80"
               value={filterValue}
               onChange={(e) => setFilterValue(e.target.value)}
             />
@@ -153,6 +143,11 @@ export function TermsTable({ terms }: TermsTableProps) {
               variant={categoryFilter === "all" ? "default" : "outline"}
               onClick={() => setCategoryFilter("all")}
               size="sm"
+              className={
+                categoryFilter === "all"
+                  ? "bg-gradient-to-r from-slate-600 to-slate-700 shadow-lg"
+                  : "border-slate-300 text-slate-700 hover:bg-slate-50"
+              }
             >
               All
             </Button>
@@ -160,6 +155,11 @@ export function TermsTable({ terms }: TermsTableProps) {
               variant={categoryFilter === "responsibilities" ? "default" : "outline"}
               onClick={() => setCategoryFilter("responsibilities")}
               size="sm"
+              className={
+                categoryFilter === "responsibilities"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg"
+                  : "text-blue-600 border-blue-300 hover:bg-blue-50"
+              }
             >
               Responsibilities
             </Button>
@@ -167,23 +167,31 @@ export function TermsTable({ terms }: TermsTableProps) {
               variant={categoryFilter === "qualifications" ? "default" : "outline"}
               onClick={() => setCategoryFilter("qualifications")}
               size="sm"
+              className={
+                categoryFilter === "qualifications"
+                  ? "bg-gradient-to-r from-red-600 to-red-700 shadow-lg"
+                  : "text-red-600 border-red-300 hover:bg-red-50"
+              }
             >
               Skills
             </Button>
           </div>
         </div>
 
-        {/* Company and role filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
                   <Building className="mr-2 h-4 w-4" />
                   {companyFilter || "All Companies"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
+              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
                 <DropdownMenuCheckboxItem
                   checked={companyFilter === null}
                   onCheckedChange={() => setCompanyFilter(null)}
@@ -204,12 +212,16 @@ export function TermsTable({ terms }: TermsTableProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
                   <Briefcase className="mr-2 h-4 w-4" />
                   {roleFilter || "All Roles"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
+              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
                 <DropdownMenuCheckboxItem checked={roleFilter === null} onCheckedChange={() => setRoleFilter(null)}>
                   All Roles
                 </DropdownMenuCheckboxItem>
@@ -227,7 +239,12 @@ export function TermsTable({ terms }: TermsTableProps) {
           </div>
 
           {(filterValue || categoryFilter !== "all" || companyFilter || roleFilter) && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="whitespace-nowrap">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="whitespace-nowrap text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+            >
               <Filter className="mr-2 h-4 w-4" />
               Clear Filters
             </Button>
@@ -235,29 +252,29 @@ export function TermsTable({ terms }: TermsTableProps) {
         </div>
       </div>
 
-      <div className="border rounded-md overflow-hidden">
+      <div className="border border-slate-200/60 rounded-xl overflow-hidden bg-white/70 backdrop-blur-sm shadow-lg">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
               <TableHead className="w-[40px]"></TableHead>
               <TableHead className="min-w-[200px]">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleSort("term")}
-                  className="font-medium h-auto p-0 hover:bg-transparent"
+                  className="font-semibold h-auto p-0 hover:bg-transparent text-slate-700 hover:text-slate-900"
                 >
                   Term
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead className="w-[150px]">Category</TableHead>
+              <TableHead className="w-[150px] font-semibold text-slate-700">Category</TableHead>
               <TableHead className="w-[100px]">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleSort("count")}
-                  className="font-medium h-auto p-0 hover:bg-transparent"
+                  className="font-semibold h-auto p-0 hover:bg-transparent text-slate-700 hover:text-slate-900"
                 >
                   Count
                   <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -268,7 +285,7 @@ export function TermsTable({ terms }: TermsTableProps) {
           <TableBody>
             {sortedTerms.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center text-slate-500">
                   No results found.
                 </TableCell>
               </TableRow>
@@ -284,37 +301,35 @@ export function TermsTable({ terms }: TermsTableProps) {
                     className="group"
                     initial={false}
                     animate={{
-                      backgroundColor: isExpanded ? "hsl(var(--muted))" : "transparent",
+                      backgroundColor: isExpanded ? "hsl(248 39% 98%)" : "transparent",
                     }}
                     transition={{ duration: 0.2 }}
                   >
                     <TableCell colSpan={4} className="p-0">
                       <div className="relative">
-                        {/* Main row content */}
                         <div
-                          className="grid grid-cols-[40px_1fr_150px_100px] items-center cursor-pointer hover:bg-muted/50 transition-colors"
+                          className="grid grid-cols-[40px_1fr_150px_100px] items-center cursor-pointer hover:bg-slate-50/80 transition-colors"
                           onClick={() => toggleRowExpanded(termKey)}
                         >
                           <div className="flex justify-center py-4">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
                               <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-4 w-4 text-slate-600" />
                               </motion.div>
                               <span className="sr-only">Toggle details</span>
                             </Button>
                           </div>
-                          <div className="py-4 px-4 font-medium text-left">{term.term}</div>
+                          <div className="py-4 px-4 font-semibold text-left text-slate-800">{term.term}</div>
                           <div className="py-4 px-4 text-left">
                             <span
-                              className={term.category === "responsibilities" ? "text-primary" : "text-destructive"}
+                              className={`font-medium ${term.category === "responsibilities" ? "text-blue-600" : "text-red-600"}`}
                             >
                               {term.category === "responsibilities" ? "Responsibility" : "Skill"}
                             </span>
                           </div>
-                          <div className="py-4 px-4 text-left">{term.count}</div>
+                          <div className="py-4 px-4 text-left font-semibold text-slate-700">{term.count}</div>
                         </div>
 
-                        {/* Expanded content */}
                         <AnimatePresence>
                           {isExpanded && (
                             <motion.div
@@ -325,14 +340,14 @@ export function TermsTable({ terms }: TermsTableProps) {
                               className="overflow-hidden"
                             >
                               <div className="px-4 pb-4">
-                                <Card className="border-l-4 border-l-primary/20 bg-background/50">
+                                <Card className="border-l-4 border-l-blue-400 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 shadow-sm">
                                   <CardContent className="p-4">
                                     <motion.div
                                       initial={{ y: -10, opacity: 0 }}
                                       animate={{ y: 0, opacity: 1 }}
                                       transition={{ delay: 0.1, duration: 0.2 }}
                                     >
-                                      <h4 className="font-semibold mb-3 text-sm flex items-center gap-2">
+                                      <h4 className="font-semibold mb-3 text-sm flex items-center gap-2 text-slate-700">
                                         Companies & Roles
                                       </h4>
                                       <div className="flex flex-wrap gap-2">
@@ -344,7 +359,10 @@ export function TermsTable({ terms }: TermsTableProps) {
                                               animate={{ scale: 1, opacity: 1 }}
                                               transition={{ delay: 0.1 + idx * 0.05, duration: 0.2 }}
                                             >
-                                              <Badge variant="outline" className="px-3 py-1">
+                                              <Badge
+                                                variant="outline"
+                                                className="px-3 py-1 bg-white/80 border-slate-300 text-slate-700 font-medium"
+                                              >
                                                 {source && typeof source === "object"
                                                   ? `${String(source.company || "Unknown Company")} - ${String(source.role || "Unknown Role")}`
                                                   : "Unknown Source"}
@@ -352,7 +370,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                                             </motion.div>
                                           ))
                                         ) : (
-                                          <span className="text-muted-foreground text-sm">
+                                          <span className="text-slate-500 text-sm">
                                             No source information available
                                           </span>
                                         )}
@@ -374,7 +392,7 @@ export function TermsTable({ terms }: TermsTableProps) {
         </Table>
       </div>
 
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-slate-500 font-medium">
         Showing {sortedTerms.length} of {sanitizedTerms.length} terms
       </div>
     </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Briefcase } from "lucide-react"
 import type { TermCount } from "./terms-skills-generator"
 
 interface TermsCloudProps {
@@ -11,10 +13,32 @@ interface TermsCloudProps {
 export function TermsCloud({ terms }: TermsCloudProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [filter, setFilter] = useState<"all" | "responsibilities" | "qualifications">("all")
+  const [roleFilter, setRoleFilter] = useState<string>("all")
+
+  // Extract unique roles from the terms data
+  const availableRoles = Array.from(
+    new Set(
+      terms.flatMap((term) =>
+        (term.sources || [])
+          .filter((source) => source && typeof source === "object")
+          .map((source) => String(source.role || "Unknown Role")),
+      ),
+    ),
+  ).sort()
 
   const filteredTerms = terms.filter((term) => {
-    if (filter === "all") return true
-    return term.category === filter
+    // Filter by category (responsibilities/qualifications)
+    const matchesCategory = filter === "all" || term.category === filter
+
+    // Filter by role
+    let matchesRole = true
+    if (roleFilter !== "all") {
+      matchesRole =
+        term.sources?.some((source) => source && typeof source === "object" && String(source.role) === roleFilter) ||
+        false
+    }
+
+    return matchesCategory && matchesRole
   })
 
   useEffect(() => {
@@ -91,45 +115,69 @@ export function TermsCloud({ terms }: TermsCloudProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center gap-3">
-        <Button
-          variant={filter === "all" ? "default" : "outline"}
-          onClick={() => setFilter("all")}
-          size="sm"
-          className={
-            filter === "all"
-              ? "bg-gradient-to-r from-slate-600 to-slate-700 shadow-lg"
-              : "border-slate-300 text-slate-700 hover:bg-slate-50"
-          }
-        >
-          All ({terms.length})
-        </Button>
-        <Button
-          variant={filter === "responsibilities" ? "default" : "outline"}
-          onClick={() => setFilter("responsibilities")}
-          size="sm"
-          className={
-            filter === "responsibilities"
-              ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg"
-              : "text-blue-600 border-blue-300 hover:bg-blue-50"
-          }
-        >
-          Responsibilities ({terms.filter((t) => t.category === "responsibilities").length})
-        </Button>
-        <Button
-          variant={filter === "qualifications" ? "default" : "outline"}
-          onClick={() => setFilter("qualifications")}
-          size="sm"
-          className={
-            filter === "qualifications"
-              ? "bg-gradient-to-r from-red-600 to-red-700 shadow-lg"
-              : "text-red-600 border-red-300 hover:bg-red-50"
-          }
-        >
-          Skills ({terms.filter((t) => t.category === "qualifications").length})
-        </Button>
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+        {/* Category Filter Buttons */}
+        <div className="flex gap-3">
+          <Button
+            variant={filter === "all" ? "default" : "outline"}
+            onClick={() => setFilter("all")}
+            size="sm"
+            className={
+              filter === "all"
+                ? "bg-gradient-to-r from-slate-600 to-slate-700 shadow-lg"
+                : "border-slate-300 text-slate-700 hover:bg-slate-50"
+            }
+          >
+            All ({terms.length})
+          </Button>
+          <Button
+            variant={filter === "responsibilities" ? "default" : "outline"}
+            onClick={() => setFilter("responsibilities")}
+            size="sm"
+            className={
+              filter === "responsibilities"
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg"
+                : "text-blue-600 border-blue-300 hover:bg-blue-50"
+            }
+          >
+            Responsibilities ({terms.filter((t) => t.category === "responsibilities").length})
+          </Button>
+          <Button
+            variant={filter === "qualifications" ? "default" : "outline"}
+            onClick={() => setFilter("qualifications")}
+            size="sm"
+            className={
+              filter === "qualifications"
+                ? "bg-gradient-to-r from-red-600 to-red-700 shadow-lg"
+                : "text-red-600 border-red-300 hover:bg-red-50"
+            }
+          >
+            Skills ({terms.filter((t) => t.category === "qualifications").length})
+          </Button>
+        </div>
+
+        {/* Role Filter Dropdown */}
+        {availableRoles.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Briefcase className="h-4 w-4 text-slate-600" />
+            <Select value={roleFilter} onValueChange={setRoleFilter}>
+              <SelectTrigger className="w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
+                <SelectValue placeholder="Filter by role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {role}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
+      {/* Legend for colors */}
       <div className="flex justify-center gap-8 text-sm font-medium">
         <div className="flex items-center gap-3">
           <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm"></div>
@@ -144,9 +192,9 @@ export function TermsCloud({ terms }: TermsCloudProps) {
       <div className="p-8 bg-gradient-to-br from-slate-50 via-white to-blue-50 border border-slate-300 min-h-[350px] text-center">
         {filteredTerms.length === 0 ? (
           <div className="flex items-center justify-center h-[350px] text-slate-500 text-lg">
-            {filter === "all"
+            {filter === "all" && roleFilter === "all"
               ? "No terms to display. Add job listings to build your cloud."
-              : `No ${filter === "responsibilities" ? "responsibilities" : "skills"} to display.`}
+              : `No ${filter === "responsibilities" ? "responsibilities" : filter === "qualifications" ? "skills" : "terms"} found${roleFilter !== "all" ? ` for role: ${roleFilter}` : ""}.`}
           </div>
         ) : (
           <div ref={containerRef} className="flex flex-wrap justify-center gap-3 leading-relaxed"></div>

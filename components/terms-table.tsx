@@ -31,6 +31,8 @@ export function TermsTable({ terms }: TermsTableProps) {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
   const [companyFilter, setCompanyFilter] = useState<string | null>(null)
   const [roleFilter, setRoleFilter] = useState<string | null>(null)
+  const [sectorFilter, setSectorFilter] = useState<string | null>(null)
+  const [experienceFilter, setExperienceFilter] = useState<string | null>(null)
 
   const sanitizedTerms = useMemo(() => {
     return terms.map((term) => ({
@@ -42,16 +44,45 @@ export function TermsTable({ terms }: TermsTableProps) {
     }))
   }, [terms])
 
-  const { companies, roles } = useMemo(() => {
+  const { companies, roles, sectors, experienceLevels } = useMemo(() => {
     const companiesSet = new Set<string>()
     const rolesSet = new Set<string>()
+    const sectorsSet = new Set<string>()
+    const experienceLevelsSet = new Set<string>()
 
     sanitizedTerms.forEach((term) => {
       if (term.sources) {
         term.sources.forEach((source) => {
           if (source && typeof source === "object") {
             companiesSet.add(String(source.company || "Unknown Company"))
-            rolesSet.add(String(source.role || "Unknown Role"))
+            const roleString = String(source.role || "Unknown Role")
+            rolesSet.add(roleString)
+
+            // Extract sector from role if it contains sector info
+            if (roleString.includes("Technology") || roleString.includes("Tech")) sectorsSet.add("Technology")
+            if (roleString.includes("Finance") || roleString.includes("Financial")) sectorsSet.add("Finance")
+            if (roleString.includes("Healthcare") || roleString.includes("Health")) sectorsSet.add("Healthcare")
+            if (roleString.includes("Education")) sectorsSet.add("Education")
+            if (roleString.includes("Retail")) sectorsSet.add("Retail")
+            if (roleString.includes("Manufacturing")) sectorsSet.add("Manufacturing")
+            if (roleString.includes("Consulting")) sectorsSet.add("Consulting")
+            if (roleString.includes("Media") || roleString.includes("Entertainment"))
+              sectorsSet.add("Media & Entertainment")
+            if (roleString.includes("Government")) sectorsSet.add("Government")
+            if (roleString.includes("Non-profit")) sectorsSet.add("Non-profit")
+
+            // Extract experience level from role
+            if (roleString.includes("Intern")) experienceLevelsSet.add("Intern")
+            if (roleString.includes("Early Career") || roleString.includes("0-2 years"))
+              experienceLevelsSet.add("Early Career (0-2 years)")
+            if (roleString.includes("Mid-level") || roleString.includes("3-5 years"))
+              experienceLevelsSet.add("Mid-level (3-5 years)")
+            if (roleString.includes("Senior") || roleString.includes("6-10 years"))
+              experienceLevelsSet.add("Senior (6-10 years)")
+            if (roleString.includes("Staff") || roleString.includes("Principal") || roleString.includes("10+ years"))
+              experienceLevelsSet.add("Staff/Principal (10+ years)")
+            if (roleString.includes("Executive") || roleString.includes("Leadership"))
+              experienceLevelsSet.add("Executive/Leadership")
           }
         })
       }
@@ -60,6 +91,8 @@ export function TermsTable({ terms }: TermsTableProps) {
     return {
       companies: Array.from(companiesSet).sort(),
       roles: Array.from(rolesSet).sort(),
+      sectors: Array.from(sectorsSet).sort(),
+      experienceLevels: Array.from(experienceLevelsSet).sort(),
     }
   }, [sanitizedTerms])
 
@@ -70,6 +103,8 @@ export function TermsTable({ terms }: TermsTableProps) {
 
       let matchesCompany = true
       let matchesRole = true
+      let matchesSector = true
+      let matchesExperience = true
 
       if (companyFilter) {
         matchesCompany =
@@ -84,9 +119,24 @@ export function TermsTable({ terms }: TermsTableProps) {
           false
       }
 
-      return matchesSearch && matchesCategory && matchesCompany && matchesRole
+      if (sectorFilter) {
+        matchesSector =
+          term.sources?.some(
+            (source) => source && typeof source === "object" && String(source.role).includes(sectorFilter),
+          ) || false
+      }
+
+      if (experienceFilter) {
+        matchesExperience =
+          term.sources?.some(
+            (source) =>
+              source && typeof source === "object" && String(source.role).includes(experienceFilter.split(" ")[0]),
+          ) || false
+      }
+
+      return matchesSearch && matchesCategory && matchesCompany && matchesRole && matchesSector && matchesExperience
     })
-  }, [sanitizedTerms, filterValue, categoryFilter, companyFilter, roleFilter])
+  }, [sanitizedTerms, filterValue, categoryFilter, companyFilter, roleFilter, sectorFilter, experienceFilter])
 
   const sortedTerms = useMemo(() => {
     return [...filteredTerms].sort((a, b) => {
@@ -123,6 +173,8 @@ export function TermsTable({ terms }: TermsTableProps) {
     setCategoryFilter("all")
     setCompanyFilter(null)
     setRoleFilter(null)
+    setSectorFilter(null)
+    setExperienceFilter(null)
   }
 
   return (
@@ -179,16 +231,12 @@ export function TermsTable({ terms }: TermsTableProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 flex gap-2">
+          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
-                >
+                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
                   <Building className="mr-2 h-4 w-4" />
-                  {companyFilter || "All Companies"}
+                  {companyFilter || "Companies"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
@@ -212,13 +260,9 @@ export function TermsTable({ terms }: TermsTableProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-slate-300 text-slate-700 hover:bg-slate-50"
-                >
+                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
                   <Briefcase className="mr-2 h-4 w-4" />
-                  {roleFilter || "All Roles"}
+                  {roleFilter || "Roles"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
@@ -236,9 +280,63 @@ export function TermsTable({ terms }: TermsTableProps) {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                  <Building className="mr-2 h-4 w-4" />
+                  {sectorFilter || "Sectors"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
+                <DropdownMenuCheckboxItem checked={sectorFilter === null} onCheckedChange={() => setSectorFilter(null)}>
+                  All Sectors
+                </DropdownMenuCheckboxItem>
+                {sectors.map((sector) => (
+                  <DropdownMenuCheckboxItem
+                    key={sector}
+                    checked={sectorFilter === sector}
+                    onCheckedChange={() => setSectorFilter(sector)}
+                  >
+                    {sector}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                  <Briefcase className="mr-2 h-4 w-4" />
+                  {experienceFilter || "Experience"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
+                <DropdownMenuCheckboxItem
+                  checked={experienceFilter === null}
+                  onCheckedChange={() => setExperienceFilter(null)}
+                >
+                  All Experience Levels
+                </DropdownMenuCheckboxItem>
+                {experienceLevels.map((level) => (
+                  <DropdownMenuCheckboxItem
+                    key={level}
+                    checked={experienceFilter === level}
+                    onCheckedChange={() => setExperienceFilter(level)}
+                  >
+                    {level}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {(filterValue || categoryFilter !== "all" || companyFilter || roleFilter) && (
+          {(filterValue ||
+            categoryFilter !== "all" ||
+            companyFilter ||
+            roleFilter ||
+            sectorFilter ||
+            experienceFilter) && (
             <Button
               variant="ghost"
               size="sm"

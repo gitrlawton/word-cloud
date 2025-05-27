@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     searchQuery += " site:linkedin.com OR site:indeed.com OR site:glassdoor.com"
 
     const prompt = `
-You are a specialized job market researcher. I need you to research current job listings for the following criteria and extract skills and responsibilities with their source information.
+You are a specialized job market researcher. I need you to research current job listings from this year for the following criteria and extract skills and responsibilities with their source information.
 
 SEARCH CRITERIA:
 - Role: ${role}
@@ -43,15 +43,9 @@ CRITICAL ROLE MATCHING REQUIREMENTS:
   ✗ "Product Marketing Manager"
   ✗ Any role that adds significant additional words that change the core function
 
-INSTRUCTIONS:
-1. Research current job listings from this year that match these criteria
-2. STRICTLY filter to only include listings where the job title closely matches "${role}"
-3. Extract the most common responsibilities and qualifications/skills from these listings
-4. For each term, include the company name and specific role title from the job listing where it was found
-5. IMPORTANT: Only use ONE job listing per company (do not include multiple listings from the same company)
-6. Focus on finding 15-25 of the most frequently mentioned items across different companies
-7. Categorize each item as either "responsibilities" or "qualifications"
-8. Return ONLY a JSON object with the following structure:
+
+For each term, include the company name and specific role title from the job listing. 
+Categorize each item as either "responsibilities" or "qualifications". Return ONLY a JSON object with the following structure:
    {
      "terms": [
        {
@@ -69,14 +63,10 @@ INSTRUCTIONS:
    }
 
 IMPORTANT RULES:
-- Each term should be 2-3 words
-- Only include relevant professional skills and responsibilities
-- Do not include common words or generic phrases
-- Count should reflect how frequently this appears across job listings (1-10 scale)
-- Include 1-3 source examples per term showing real companies and job titles where this term appeared
-- NEVER include multiple job listings from the same company - use only one listing per company
+- Each term should consist of 2-3 words
+- Count should reflect how many times the term appeared across your job listings search (an integer >= 1.)
 - STRICTLY adhere to the role title "${role}" - do not include tangentially related roles
-- If no specific company is mentioned, use "Unknown Company". It should never be the job board (Indeed, Monster, Glassdoor, etc.)
+- If no specific company is mentioned, do not include the listing in your search.  DO NOT use job board site for the company name (Indeed, Monster, Glassdoor, etc.)
 - Ensure the JSON is valid and properly formatted
 - Make sure all counts are numeric values, not objects or strings
 - Include the total number of unique job listings analyzed in the "totalListings" field
@@ -86,7 +76,7 @@ EXAMPLE OUTPUT:
 {
   "terms": [
     {
-      "term": "React development", 
+      "term": "react development", 
       "count": 8, 
       "category": "qualifications",
       "sources": [
@@ -105,7 +95,7 @@ EXAMPLE OUTPUT:
       ]
     },
     {
-      "term": "JavaScript proficiency", 
+      "term": "javascript proficiency", 
       "count": 9, 
       "category": "qualifications",
       "sources": [
@@ -117,8 +107,6 @@ EXAMPLE OUTPUT:
   ],
   "totalListings": 15
 }
-
-Please research and analyze job listings for the role "${role}" specifically and provide the extracted terms with their source information. Remember to use only ONE listing per company and STRICTLY match the role title.
 `
 
     const response = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -128,7 +116,7 @@ Please research and analyze job listings for the role "${role}" specifically and
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-sonar-large-128k-online",
+        model: "sonar-pro",
         messages: [
           {
             role: "user",

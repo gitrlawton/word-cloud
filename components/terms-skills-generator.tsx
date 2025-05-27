@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { TermsCloud } from "@/components/terms-cloud"
 import { TermsTable } from "@/components/terms-table"
+import { AutocompleteInput } from "@/components/autocomplete-input"
 import { useToast } from "@/hooks/use-toast"
 import { PlusCircle, RotateCw, AlertCircle, Building, Briefcase, Search, Zap } from "lucide-react"
 import { Label } from "@/components/ui/label"
@@ -73,6 +74,35 @@ export function TermsSkillsGenerator() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [activeTab, setActiveTab] = useState<"cloud" | "table">("cloud")
   const { toast } = useToast()
+
+  // Extract unique companies and roles for autocomplete
+  const { previousCompanies, previousRoles } = useMemo(() => {
+    const companiesSet = new Set<string>()
+    const rolesSet = new Set<string>()
+
+    termsData.forEach((term) => {
+      if (term.sources) {
+        term.sources.forEach((source) => {
+          if (source && typeof source === "object") {
+            const companyName = String(source.company || "").trim()
+            const roleName = String(source.role || "").trim()
+
+            if (companyName && companyName !== "Unknown Company" && companyName !== "Market Research") {
+              companiesSet.add(companyName)
+            }
+            if (roleName && roleName !== "Unknown Role" && !roleName.includes("(")) {
+              rolesSet.add(roleName)
+            }
+          }
+        })
+      }
+    })
+
+    return {
+      previousCompanies: Array.from(companiesSet).sort(),
+      previousRoles: Array.from(rolesSet).sort(),
+    }
+  }, [termsData])
 
   // Update character counts when text changes
   useEffect(() => {
@@ -337,6 +367,10 @@ export function TermsSkillsGenerator() {
   const responsibilitiesCount = termsData.filter((term) => term.category === "responsibilities").length
   const skillsCount = termsData.filter((term) => term.category === "qualifications").length
 
+  // Check if sector or company fields should be disabled
+  const isSectorDisabled = autoCompany.trim() !== ""
+  const isCompanyDisabled = autoSector.trim() !== ""
+
   return (
     <div className="grid gap-8 max-w-7xl mx-auto">
       {/* Mode Selection */}
@@ -390,11 +424,12 @@ export function TermsSkillsGenerator() {
                   <Label htmlFor="company" className="text-slate-700 font-medium">
                     Company (Optional)
                   </Label>
-                  <Input
+                  <AutocompleteInput
                     id="company"
                     placeholder="Enter company name"
                     value={company}
-                    onChange={(e) => setCompany(e.target.value)}
+                    onChange={setCompany}
+                    suggestions={previousCompanies}
                     className="border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white"
                   />
                 </div>
@@ -402,11 +437,12 @@ export function TermsSkillsGenerator() {
                   <Label htmlFor="role" className="text-slate-700 font-medium">
                     Role (Optional)
                   </Label>
-                  <Input
+                  <AutocompleteInput
                     id="role"
                     placeholder="Enter job role/title"
                     value={role}
-                    onChange={(e) => setRole(e.target.value)}
+                    onChange={setRole}
+                    suggestions={previousRoles}
                     className="border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white"
                   />
                 </div>
@@ -587,34 +623,100 @@ export function TermsSkillsGenerator() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-3">
-                  <Label htmlFor="autoSector" className="text-slate-700 font-medium">
-                    Sector (Optional)
-                  </Label>
-                  <Select value={autoSector} onValueChange={setAutoSector}>
-                    <SelectTrigger className="border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 bg-white">
-                      <SelectValue placeholder="Select sector" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SECTORS.map((sector) => (
-                        <SelectItem key={sector} value={sector}>
-                          {sector}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              </div>
+
+              {/* OR Section with Visual Separator */}
+              <div className="mt-8">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white px-4 text-slate-500 font-medium">
+                      Choose either Sector OR Company (not both)
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <Label htmlFor="autoCompany" className="text-slate-700 font-medium">
-                    Company (Optional)
-                  </Label>
-                  <Input
-                    id="autoCompany"
-                    placeholder="e.g., Google, Meta, Apple"
-                    value={autoCompany}
-                    onChange={(e) => setAutoCompany(e.target.value)}
-                    className="border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 bg-white"
-                  />
+
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="autoSector"
+                      className={`font-medium ${isSectorDisabled ? "text-slate-400" : "text-slate-700"}`}
+                    >
+                      Sector {isSectorDisabled && "(disabled - clear Company to enable)"}
+                    </Label>
+                    <Select
+                      value={autoSector}
+                      onValueChange={(value) => {
+                        if (value === "__CLEAR__") {
+                          setAutoSector("")
+                        } else {
+                          setAutoSector(value)
+                        }
+                      }}
+                      disabled={isSectorDisabled}
+                    >
+                      <SelectTrigger
+                        className={`border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 ${
+                          isSectorDisabled ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-white"
+                        }`}
+                      >
+                        <SelectValue
+                          placeholder={isSectorDisabled ? "Clear Company field to enable" : "Select sector"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {autoSector && (
+                          <SelectItem value="__CLEAR__" className="text-slate-500 italic">
+                            Clear selection
+                          </SelectItem>
+                        )}
+                        {SECTORS.map((sector) => (
+                          <SelectItem key={sector} value={sector}>
+                            {sector}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-3">
+                    <Label
+                      htmlFor="autoCompany"
+                      className={`font-medium ${isCompanyDisabled ? "text-slate-400" : "text-slate-700"}`}
+                    >
+                      Company {isCompanyDisabled && "(disabled - clear Sector to enable)"}
+                    </Label>
+                    <Input
+                      id="autoCompany"
+                      placeholder={isCompanyDisabled ? "Clear Sector field to enable" : "e.g., Google, Meta, Apple"}
+                      value={autoCompany}
+                      onChange={(e) => setAutoCompany(e.target.value)}
+                      disabled={isCompanyDisabled}
+                      className={`border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 ${
+                        isCompanyDisabled ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-white"
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {/* Helper text */}
+                <div className="mt-3 text-sm text-slate-500 text-center">
+                  {autoSector && autoCompany ? (
+                    <span className="text-amber-600 font-medium">
+                      ⚠️ Please choose either Sector OR Company, not both
+                    </span>
+                  ) : autoSector ? (
+                    <span>
+                      Searching across the <strong>{autoSector}</strong> sector
+                    </span>
+                  ) : autoCompany ? (
+                    <span>
+                      Searching specifically at <strong>{autoCompany}</strong>
+                    </span>
+                  ) : (
+                    <span>Optionally narrow your search by sector or specific company</span>
+                  )}
                 </div>
               </div>
             </CardContent>

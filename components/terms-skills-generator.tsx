@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { TermsCloud } from "@/components/terms-cloud"
 import { TermsTable } from "@/components/terms-table"
+import { AutoTermsCloud } from "@/components/auto-terms-cloud"
+import { AutoTermsTable } from "@/components/auto-terms-table"
 import { AutocompleteInput } from "@/components/autocomplete-input"
 import { useToast } from "@/hooks/use-toast"
 import { PlusCircle, RotateCw, AlertCircle, Building, Briefcase, Search, Zap } from "lucide-react"
@@ -68,19 +70,25 @@ export function TermsSkillsGenerator() {
   const [autoExperience, setAutoExperience] = useState("")
   const [autoCompany, setAutoCompany] = useState("")
 
+  // Manual data state (separate from auto-generated)
+  const [manualTermsData, setManualTermsData] = useState<TermCount[]>([])
+  const [manualTotalListings, setManualTotalListings] = useState(0)
+
+  // Auto-generated data state (separate from manual)
+  const [autoTermsData, setAutoTermsData] = useState<TermCount[]>([])
+  const [autoTotalListings, setAutoTotalListings] = useState(0)
+
   // Shared state
-  const [termsData, setTermsData] = useState<TermCount[]>([])
-  const [totalListings, setTotalListings] = useState(0)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [activeTab, setActiveTab] = useState<"cloud" | "table">("cloud")
   const { toast } = useToast()
 
-  // Extract unique companies and roles for autocomplete
+  // Extract unique companies and roles for autocomplete from manual data only
   const { previousCompanies, previousRoles } = useMemo(() => {
     const companiesSet = new Set<string>()
     const rolesSet = new Set<string>()
 
-    termsData.forEach((term) => {
+    manualTermsData.forEach((term) => {
       if (term.sources) {
         term.sources.forEach((source) => {
           if (source && typeof source === "object") {
@@ -102,7 +110,7 @@ export function TermsSkillsGenerator() {
       previousCompanies: Array.from(companiesSet).sort(),
       previousRoles: Array.from(rolesSet).sort(),
     }
-  }, [termsData])
+  }, [manualTermsData])
 
   // Update character counts when text changes
   useEffect(() => {
@@ -204,13 +212,13 @@ export function TermsSkillsGenerator() {
         sources: [sourceInfo],
       }))
 
-      const updatedTerms = mergeTerms(termsData, termsWithSource)
-      setTermsData(updatedTerms)
-      setTotalListings((prev) => prev + 1) // Add 1 for manual input
+      const updatedTerms = mergeTerms(manualTermsData, termsWithSource)
+      setManualTermsData(updatedTerms)
+      setManualTotalListings((prev) => prev + 1) // Add 1 for manual input
 
       toast({
         title: "Analysis complete",
-        description: `Added ${data.terms.length} terms to your cloud.`,
+        description: `Added ${data.terms.length} terms to your manual cloud.`,
       })
 
       setResponsibilities("")
@@ -275,17 +283,17 @@ export function TermsSkillsGenerator() {
             : [{ company: autoCompany.trim() || "Market Research", role: `${autoRole} (${autoExperience})` }],
       }))
 
-      const updatedTerms = mergeTerms(termsData, termsWithValidatedSources)
-      setTermsData(updatedTerms)
+      const updatedTerms = mergeTerms(autoTermsData, termsWithValidatedSources)
+      setAutoTermsData(updatedTerms)
 
       // Add the total listings from the API response
       if (typeof data.totalListings === "number") {
-        setTotalListings((prev) => prev + data.totalListings)
+        setAutoTotalListings((prev) => prev + data.totalListings)
       }
 
       toast({
         title: "Auto-generation complete",
-        description: `Added ${data.terms.length} terms from ${data.totalListings || 0} job listings.`,
+        description: `Added ${data.terms.length} terms from ${data.totalListings || 0} job listings to your auto-generated cloud.`,
       })
 
       setAutoRole("")
@@ -346,30 +354,44 @@ export function TermsSkillsGenerator() {
     return Array.from(termMap.values()).sort((a, b) => b.count - a.count)
   }
 
-  const resetCloud = () => {
-    if (termsData.length === 0) return
+  const resetManualCloud = () => {
+    if (manualTermsData.length === 0) return
 
-    setTermsData([])
-    setTotalListings(0)
+    setManualTermsData([])
+    setManualTotalListings(0)
     toast({
-      title: "Cloud reset",
-      description: "Your terms cloud has been reset.",
+      title: "Manual cloud reset",
+      description: "Your manual terms cloud has been reset.",
     })
   }
 
-  const calculateTotalMentions = () => {
-    return termsData.reduce((sum, term) => {
+  const resetAutoCloud = () => {
+    if (autoTermsData.length === 0) return
+
+    setAutoTermsData([])
+    setAutoTotalListings(0)
+    toast({
+      title: "Auto-generated cloud reset",
+      description: "Your auto-generated terms cloud has been reset.",
+    })
+  }
+
+  const calculateTotalMentions = (terms: TermCount[]) => {
+    return terms.reduce((sum, term) => {
       const count = typeof term.count === "number" ? term.count : 0
       return sum + count
     }, 0)
   }
 
-  const responsibilitiesCount = termsData.filter((term) => term.category === "responsibilities").length
-  const skillsCount = termsData.filter((term) => term.category === "qualifications").length
-
   // Check if sector or company fields should be disabled
   const isSectorDisabled = autoCompany.trim() !== ""
   const isCompanyDisabled = autoSector.trim() !== ""
+
+  // Get current data based on mode
+  const currentTermsData = mode === "manual" ? manualTermsData : autoTermsData
+  const currentTotalListings = mode === "manual" ? manualTotalListings : autoTotalListings
+  const responsibilitiesCount = currentTermsData.filter((term) => term.category === "responsibilities").length
+  const skillsCount = currentTermsData.filter((term) => term.category === "qualifications").length
 
   return (
     <div className="grid gap-8 max-w-7xl mx-auto">
@@ -563,14 +585,14 @@ export function TermsSkillsGenerator() {
               )}
             </Button>
 
-            {termsData.length > 0 && (
+            {manualTermsData.length > 0 && (
               <Button
                 size="lg"
                 variant="outline"
-                onClick={resetCloud}
+                onClick={resetManualCloud}
                 className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
               >
-                Reset Cloud
+                Reset Manual Cloud
               </Button>
             )}
           </div>
@@ -742,27 +764,30 @@ export function TermsSkillsGenerator() {
               )}
             </Button>
 
-            {termsData.length > 0 && (
+            {autoTermsData.length > 0 && (
               <Button
                 size="lg"
                 variant="outline"
-                onClick={resetCloud}
+                onClick={resetAutoCloud}
                 className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
               >
-                Reset Cloud
+                Reset Auto Cloud
               </Button>
             )}
           </div>
         </>
       )}
 
-      {termsData.length > 0 && (
+      {currentTermsData.length > 0 && (
         <Card className="bg-white border-slate-300 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300">
-            <CardTitle className="text-slate-800 text-2xl">Terms & Skills Cloud</CardTitle>
+            <CardTitle className="text-slate-800 text-2xl">
+              {mode === "manual" ? "Manual Terms & Skills Cloud" : "Auto-Generated Terms & Skills Cloud"}
+            </CardTitle>
             <CardDescription className="text-slate-600 text-lg">
-              Showing {termsData.length} unique terms ({responsibilitiesCount} responsibilities, {skillsCount} skills)
-              from {calculateTotalMentions()} total mentions across {totalListings} total listings
+              Showing {currentTermsData.length} unique terms ({responsibilitiesCount} responsibilities, {skillsCount}{" "}
+              skills) from {calculateTotalMentions(currentTermsData)} total mentions across {currentTotalListings} total
+              listings
             </CardDescription>
             <Tabs
               defaultValue="cloud"
@@ -778,10 +803,18 @@ export function TermsSkillsGenerator() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="cloud" className="mt-8">
-                <TermsCloud terms={termsData} />
+                {mode === "manual" ? (
+                  <TermsCloud terms={currentTermsData} />
+                ) : (
+                  <AutoTermsCloud terms={currentTermsData} />
+                )}
               </TabsContent>
               <TabsContent value="table" className="mt-8">
-                <TermsTable terms={termsData} />
+                {mode === "manual" ? (
+                  <TermsTable terms={currentTermsData} />
+                ) : (
+                  <AutoTermsTable terms={currentTermsData} />
+                )}
               </TabsContent>
             </Tabs>
           </CardHeader>

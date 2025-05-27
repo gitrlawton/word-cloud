@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     searchQuery += " site:linkedin.com OR site:indeed.com OR site:glassdoor.com"
 
     const prompt = `
-You are a specialized job market researcher. I need you to research current job listings from this year for the following criteria and extract skills and responsibilities with their source information.
+You are a specialized job market researcher. I need you to search for 17 current job listings from this year for the following criteria and extract skills and responsibilities with their source information.
 
 SEARCH CRITERIA:
 - Role: ${role}

@@ -1,19 +1,27 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Briefcase } from "lucide-react"
-import type { TermCount } from "./terms-skills-generator"
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Briefcase } from "lucide-react";
+import type { TermCount } from "./terms-skills-generator";
 
 interface AutoTermsCloudProps {
-  terms: TermCount[]
+  terms: TermCount[];
 }
 
 export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [filter, setFilter] = useState<"all" | "responsibilities" | "qualifications">("all")
-  const [roleFilter, setRoleFilter] = useState<string>("all")
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [filter, setFilter] = useState<
+    "all" | "responsibilities" | "qualifications"
+  >("all");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
 
   // Extract unique roles from the terms data
   const availableRoles = Array.from(
@@ -21,31 +29,35 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
       terms.flatMap((term) =>
         (term.sources || [])
           .filter((source) => source && typeof source === "object")
-          .map((source) => String(source.role || "Unknown Role")),
-      ),
-    ),
-  ).sort()
+          .map((source) => String(source.role || "Unknown Role"))
+      )
+    )
+  ).sort();
 
   const filteredTerms = terms.filter((term) => {
     // Filter by category (responsibilities/qualifications)
-    const matchesCategory = filter === "all" || term.category === filter
+    const matchesCategory = filter === "all" || term.category === filter;
 
     // Filter by role
-    let matchesRole = true
+    let matchesRole = true;
     if (roleFilter !== "all") {
       matchesRole =
-        term.sources?.some((source) => source && typeof source === "object" && String(source.role) === roleFilter) ||
-        false
+        term.sources?.some(
+          (source) =>
+            source &&
+            typeof source === "object" &&
+            String(source.role) === roleFilter
+        ) || false;
     }
 
-    return matchesCategory && matchesRole
-  })
+    return matchesCategory && matchesRole;
+  });
 
   useEffect(() => {
-    if (!containerRef.current || filteredTerms.length === 0) return
+    if (!containerRef.current || filteredTerms.length === 0) return;
 
-    const container = containerRef.current
-    container.innerHTML = ""
+    const container = containerRef.current;
+    container.innerHTML = "";
 
     const sanitizedTerms = filteredTerms.map((term) => ({
       ...term,
@@ -53,65 +65,72 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
       count: typeof term.count === "number" ? term.count : 1,
       category: term.category || "qualifications",
       sources: Array.isArray(term.sources) ? term.sources : [],
-    }))
+    }));
 
-    const maxCount = Math.max(...sanitizedTerms.map((t) => t.count))
-    const minFontSize = 16
-    const maxFontSize = 48
+    const maxCount = Math.max(...sanitizedTerms.map((t) => t.count));
+    const minFontSize = 16;
+    const maxFontSize = 48;
 
     sanitizedTerms.slice(0, 100).forEach((term) => {
-      const fontSize = minFontSize + (term.count / maxCount) * (maxFontSize - minFontSize)
+      const fontSize =
+        minFontSize + (term.count / maxCount) * (maxFontSize - minFontSize);
 
-      const span = document.createElement("span")
-      span.textContent = term.term
-      span.style.fontSize = `${fontSize}px`
-      span.style.padding = "12px"
-      span.style.display = "inline-block"
-      span.style.cursor = "pointer"
-      span.style.transition = "all 0.3s ease"
-      span.style.borderRadius = "8px"
-      span.style.fontWeight = "600"
+      const span = document.createElement("span");
+      span.textContent = term.term;
+      span.style.fontSize = `${fontSize}px`;
+      span.style.padding = "12px";
+      span.style.display = "inline-block";
+      span.style.cursor = "pointer";
+      span.style.transition = "all 0.3s ease";
+      span.style.borderRadius = "8px";
+      span.style.fontWeight = "600";
 
       if (term.category === "responsibilities") {
-        span.style.color = "#2563eb" // Blue-600
-        span.style.background = "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.15))"
+        span.style.color = "#2563eb"; // Blue-600
+        span.style.background =
+          "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.15))";
       } else {
-        span.style.color = "#dc2626" // Red-600
-        span.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))"
+        span.style.color = "#dc2626"; // Red-600
+        span.style.background =
+          "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))";
       }
 
-      let tooltipText = `${term.term}: ${term.count} occurrences (${term.category === "responsibilities" ? "Responsibility" : "Skill"})`
-      if (term.sources && term.sources.length > 0) {
-        tooltipText += `\nSources: ${term.sources
-          .filter((s) => s && typeof s === "object")
-          .map((s) => `${String(s.company || "Unknown Company")} - ${String(s.role || "Unknown Role")}`)
-          .join(", ")}`
-      }
-      span.title = tooltipText
+      // let tooltipText = `${term.term}: ${term.count} occurrences (${term.category === "responsibilities" ? "Responsibility" : "Skill"})`
+      // if (term.sources && term.sources.length > 0) {
+      //   tooltipText += `\nSources: ${term.sources
+      //     .filter((s) => s && typeof s === "object")
+      //     .map((s) => `${String(s.company || "Unknown Company")} - ${String(s.role || "Unknown Role")}`)
+      //     .join(", ")}`
+      // }
+      // span.title = tooltipText
 
       span.addEventListener("mouseover", () => {
-        span.style.transform = "scale(1.1) translateY(-2px)"
-        span.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.15)"
+        span.style.transform = "scale(1.1) translateY(-2px)";
+        span.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.15)";
         if (term.category === "responsibilities") {
-          span.style.background = "linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.25))"
+          span.style.background =
+            "linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.25))";
         } else {
-          span.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.25))"
+          span.style.background =
+            "linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.25))";
         }
-      })
+      });
 
       span.addEventListener("mouseout", () => {
-        span.style.transform = "scale(1) translateY(0)"
-        span.style.boxShadow = "none"
+        span.style.transform = "scale(1) translateY(0)";
+        span.style.boxShadow = "none";
         if (term.category === "responsibilities") {
-          span.style.background = "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.15))"
+          span.style.background =
+            "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.15))";
         } else {
-          span.style.background = "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))"
+          span.style.background =
+            "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))";
         }
-      })
+      });
 
-      container.appendChild(span)
-    })
-  }, [filteredTerms])
+      container.appendChild(span);
+    });
+  }, [filteredTerms]);
 
   return (
     <div className="space-y-6">
@@ -140,7 +159,8 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
                 : "text-blue-600 border-blue-300 hover:bg-blue-50"
             }
           >
-            Responsibilities ({terms.filter((t) => t.category === "responsibilities").length})
+            Responsibilities (
+            {terms.filter((t) => t.category === "responsibilities").length})
           </Button>
           <Button
             variant={filter === "qualifications" ? "default" : "outline"}
@@ -152,7 +172,8 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
                 : "text-red-600 border-red-300 hover:bg-red-50"
             }
           >
-            Skills ({terms.filter((t) => t.category === "qualifications").length})
+            Skills (
+            {terms.filter((t) => t.category === "qualifications").length})
           </Button>
         </div>
 
@@ -197,9 +218,12 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
               : `No ${filter === "responsibilities" ? "responsibilities" : filter === "qualifications" ? "skills" : "terms"} found${roleFilter !== "all" ? ` for role: ${roleFilter}` : ""}.`}
           </div>
         ) : (
-          <div ref={containerRef} className="flex flex-wrap justify-center gap-3 leading-relaxed"></div>
+          <div
+            ref={containerRef}
+            className="flex flex-wrap justify-center gap-3 leading-relaxed"
+          ></div>
         )}
       </div>
     </div>
-  )
+  );
 }

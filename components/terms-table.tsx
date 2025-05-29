@@ -1,38 +1,52 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ChevronDown, Search, Building, Briefcase, Filter } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { motion, AnimatePresence } from "framer-motion"
-import type { TermCount } from "./terms-skills-generator"
+import { useState, useMemo } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  ArrowUpDown,
+  ChevronDown,
+  Search,
+  Building,
+  Briefcase,
+  Filter,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import type { TermCount } from "./terms-skills-generator";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 interface TermsTableProps {
-  terms: TermCount[]
+  terms: TermCount[];
 }
 
-type SortField = "term" | "count"
-type SortOrder = "asc" | "desc"
+type SortField = "term" | "count";
+type SortOrder = "asc" | "desc";
 
 export function TermsTable({ terms }: TermsTableProps) {
-  const [sortField, setSortField] = useState<SortField>("count")
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc")
-  const [filterValue, setFilterValue] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "responsibilities" | "qualifications">("all")
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
-  const [companyFilter, setCompanyFilter] = useState<string | null>(null)
-  const [roleFilter, setRoleFilter] = useState<string | null>(null)
-  const [sectorFilter, setSectorFilter] = useState<string | null>(null)
-  const [experienceFilter, setExperienceFilter] = useState<string | null>(null)
+  const [sortField, setSortField] = useState<SortField>("count");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [filterValue, setFilterValue] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<
+    "all" | "responsibilities" | "qualifications"
+  >("all");
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [companyFilter, setCompanyFilter] = useState<string | null>(null);
+  const [roleFilter, setRoleFilter] = useState<string | null>(null);
 
   const sanitizedTerms = useMemo(() => {
     return terms.map((term) => ({
@@ -41,141 +55,104 @@ export function TermsTable({ terms }: TermsTableProps) {
       count: typeof term.count === "number" ? term.count : 1,
       category: term.category || "qualifications",
       sources: Array.isArray(term.sources) ? term.sources : [],
-    }))
-  }, [terms])
+    }));
+  }, [terms]);
 
-  const { companies, roles, sectors, experienceLevels } = useMemo(() => {
-    const companiesSet = new Set<string>()
-    const rolesSet = new Set<string>()
-    const sectorsSet = new Set<string>()
-    const experienceLevelsSet = new Set<string>()
+  const { companies, roles } = useMemo(() => {
+    const companiesSet = new Set<string>();
+    const rolesSet = new Set<string>();
 
     sanitizedTerms.forEach((term) => {
       if (term.sources) {
         term.sources.forEach((source) => {
           if (source && typeof source === "object") {
-            companiesSet.add(String(source.company || "Unknown Company"))
-            const roleString = String(source.role || "Unknown Role")
-            rolesSet.add(roleString)
-
-            // Extract sector from role if it contains sector info
-            if (roleString.includes("Technology") || roleString.includes("Tech")) sectorsSet.add("Technology")
-            if (roleString.includes("Finance") || roleString.includes("Financial")) sectorsSet.add("Finance")
-            if (roleString.includes("Healthcare") || roleString.includes("Health")) sectorsSet.add("Healthcare")
-            if (roleString.includes("Education")) sectorsSet.add("Education")
-            if (roleString.includes("Retail")) sectorsSet.add("Retail")
-            if (roleString.includes("Manufacturing")) sectorsSet.add("Manufacturing")
-            if (roleString.includes("Consulting")) sectorsSet.add("Consulting")
-            if (roleString.includes("Media") || roleString.includes("Entertainment"))
-              sectorsSet.add("Media & Entertainment")
-            if (roleString.includes("Government")) sectorsSet.add("Government")
-            if (roleString.includes("Non-profit")) sectorsSet.add("Non-profit")
-
-            // Extract experience level from role
-            if (roleString.includes("Intern")) experienceLevelsSet.add("Intern")
-            if (roleString.includes("Early Career") || roleString.includes("0-2 years"))
-              experienceLevelsSet.add("Early Career (0-2 years)")
-            if (roleString.includes("Mid-level") || roleString.includes("3-5 years"))
-              experienceLevelsSet.add("Mid-level (3-5 years)")
-            if (roleString.includes("Senior") || roleString.includes("6-10 years"))
-              experienceLevelsSet.add("Senior (6-10 years)")
-            if (roleString.includes("Staff") || roleString.includes("Principal") || roleString.includes("10+ years"))
-              experienceLevelsSet.add("Staff/Principal (10+ years)")
-            if (roleString.includes("Executive") || roleString.includes("Leadership"))
-              experienceLevelsSet.add("Executive/Leadership")
+            companiesSet.add(String(source.company || "Unknown Company"));
+            const roleString = String(source.role || "Unknown Role");
+            rolesSet.add(roleString);
           }
-        })
+        });
       }
-    })
+    });
 
     return {
       companies: Array.from(companiesSet).sort(),
       roles: Array.from(rolesSet).sort(),
-      sectors: Array.from(sectorsSet).sort(),
-      experienceLevels: Array.from(experienceLevelsSet).sort(),
-    }
-  }, [sanitizedTerms])
+    };
+  }, [sanitizedTerms]);
 
   const filteredTerms = useMemo(() => {
     return sanitizedTerms.filter((term) => {
-      const matchesSearch = String(term.term).toLowerCase().includes(filterValue.toLowerCase())
-      const matchesCategory = categoryFilter === "all" || term.category === categoryFilter
+      const matchesSearch = String(term.term)
+        .toLowerCase()
+        .includes(filterValue.toLowerCase());
+      const matchesCategory =
+        categoryFilter === "all" || term.category === categoryFilter;
 
-      let matchesCompany = true
-      let matchesRole = true
-      let matchesSector = true
-      let matchesExperience = true
+      let matchesCompany = true;
+      let matchesRole = true;
 
       if (companyFilter) {
         matchesCompany =
           term.sources?.some(
-            (source) => source && typeof source === "object" && String(source.company) === companyFilter,
-          ) || false
+            (source) =>
+              source &&
+              typeof source === "object" &&
+              String(source.company) === companyFilter
+          ) || false;
       }
 
       if (roleFilter) {
         matchesRole =
-          term.sources?.some((source) => source && typeof source === "object" && String(source.role) === roleFilter) ||
-          false
-      }
-
-      if (sectorFilter) {
-        matchesSector =
-          term.sources?.some(
-            (source) => source && typeof source === "object" && String(source.role).includes(sectorFilter),
-          ) || false
-      }
-
-      if (experienceFilter) {
-        matchesExperience =
           term.sources?.some(
             (source) =>
-              source && typeof source === "object" && String(source.role).includes(experienceFilter.split(" ")[0]),
-          ) || false
+              source &&
+              typeof source === "object" &&
+              String(source.role) === roleFilter
+          ) || false;
       }
 
-      return matchesSearch && matchesCategory && matchesCompany && matchesRole && matchesSector && matchesExperience
-    })
-  }, [sanitizedTerms, filterValue, categoryFilter, companyFilter, roleFilter, sectorFilter, experienceFilter])
+      return matchesSearch && matchesCategory && matchesCompany && matchesRole;
+    });
+  }, [sanitizedTerms, filterValue, categoryFilter, companyFilter, roleFilter]);
 
   const sortedTerms = useMemo(() => {
     return [...filteredTerms].sort((a, b) => {
       if (sortField === "term") {
-        const termA = String(a.term).toLowerCase()
-        const termB = String(b.term).toLowerCase()
-        return sortOrder === "asc" ? termA.localeCompare(termB) : termB.localeCompare(termA)
+        const termA = String(a.term).toLowerCase();
+        const termB = String(b.term).toLowerCase();
+        return sortOrder === "asc"
+          ? termA.localeCompare(termB)
+          : termB.localeCompare(termA);
       } else {
-        const countA = typeof a.count === "number" ? a.count : 0
-        const countB = typeof b.count === "number" ? b.count : 0
-        return sortOrder === "asc" ? countA - countB : countB - countA
+        const countA = typeof a.count === "number" ? a.count : 0;
+        const countB = typeof b.count === "number" ? b.count : 0;
+        return sortOrder === "asc" ? countA - countB : countB - countA;
       }
-    })
-  }, [filteredTerms, sortField, sortOrder])
+    });
+  }, [filteredTerms, sortField, sortOrder]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      setSortField(field)
-      setSortOrder(field === "term" ? "asc" : "desc")
+      setSortField(field);
+      setSortOrder(field === "term" ? "asc" : "desc");
     }
-  }
+  };
 
   const toggleRowExpanded = (termKey: string) => {
     setExpandedRows((prev) => ({
       ...prev,
       [termKey]: !prev[termKey],
-    }))
-  }
+    }));
+  };
 
   const clearFilters = () => {
-    setFilterValue("")
-    setCategoryFilter("all")
-    setCompanyFilter(null)
-    setRoleFilter(null)
-    setSectorFilter(null)
-    setExperienceFilter(null)
-  }
+    setFilterValue("");
+    setCategoryFilter("all");
+    setCompanyFilter(null);
+    setRoleFilter(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -204,7 +181,9 @@ export function TermsTable({ terms }: TermsTableProps) {
               All
             </Button>
             <Button
-              variant={categoryFilter === "responsibilities" ? "default" : "outline"}
+              variant={
+                categoryFilter === "responsibilities" ? "default" : "outline"
+              }
               onClick={() => setCategoryFilter("responsibilities")}
               size="sm"
               className={
@@ -216,7 +195,9 @@ export function TermsTable({ terms }: TermsTableProps) {
               Responsibilities
             </Button>
             <Button
-              variant={categoryFilter === "qualifications" ? "default" : "outline"}
+              variant={
+                categoryFilter === "qualifications" ? "default" : "outline"
+              }
               onClick={() => setCategoryFilter("qualifications")}
               size="sm"
               className={
@@ -231,10 +212,14 @@ export function TermsTable({ terms }: TermsTableProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="flex-1 flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50 flex-1"
+                >
                   <Building className="mr-2 h-4 w-4" />
                   {companyFilter || "Companies"}
                 </Button>
@@ -260,13 +245,20 @@ export function TermsTable({ terms }: TermsTableProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50 flex-1"
+                >
                   <Briefcase className="mr-2 h-4 w-4" />
                   {roleFilter || "Roles"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
-                <DropdownMenuCheckboxItem checked={roleFilter === null} onCheckedChange={() => setRoleFilter(null)}>
+                <DropdownMenuCheckboxItem
+                  checked={roleFilter === null}
+                  onCheckedChange={() => setRoleFilter(null)}
+                >
                   All Roles
                 </DropdownMenuCheckboxItem>
                 {roles.map((role) => (
@@ -280,63 +272,12 @@ export function TermsTable({ terms }: TermsTableProps) {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
-                  <Building className="mr-2 h-4 w-4" />
-                  {sectorFilter || "Sectors"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
-                <DropdownMenuCheckboxItem checked={sectorFilter === null} onCheckedChange={() => setSectorFilter(null)}>
-                  All Sectors
-                </DropdownMenuCheckboxItem>
-                {sectors.map((sector) => (
-                  <DropdownMenuCheckboxItem
-                    key={sector}
-                    checked={sectorFilter === sector}
-                    onCheckedChange={() => setSectorFilter(sector)}
-                  >
-                    {sector}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="border-slate-300 text-slate-700 hover:bg-slate-50">
-                  <Briefcase className="mr-2 h-4 w-4" />
-                  {experienceFilter || "Experience"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
-                <DropdownMenuCheckboxItem
-                  checked={experienceFilter === null}
-                  onCheckedChange={() => setExperienceFilter(null)}
-                >
-                  All Experience Levels
-                </DropdownMenuCheckboxItem>
-                {experienceLevels.map((level) => (
-                  <DropdownMenuCheckboxItem
-                    key={level}
-                    checked={experienceFilter === level}
-                    onCheckedChange={() => setExperienceFilter(level)}
-                  >
-                    {level}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           {(filterValue ||
             categoryFilter !== "all" ||
             companyFilter ||
-            roleFilter ||
-            sectorFilter ||
-            experienceFilter) && (
+            roleFilter) && (
             <Button
               variant="ghost"
               size="sm"
@@ -366,7 +307,9 @@ export function TermsTable({ terms }: TermsTableProps) {
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead className="w-[150px] font-semibold text-slate-700">Category</TableHead>
+              <TableHead className="w-[150px] font-semibold text-slate-700">
+                Category
+              </TableHead>
               <TableHead className="w-[100px]">
                 <Button
                   variant="ghost"
@@ -383,14 +326,17 @@ export function TermsTable({ terms }: TermsTableProps) {
           <TableBody>
             {sortedTerms.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center text-slate-500">
+                <TableCell
+                  colSpan={4}
+                  className="h-24 text-center text-slate-500"
+                >
                   No results found.
                 </TableCell>
               </TableRow>
             ) : (
               sortedTerms.map((term, index) => {
-                const termKey = `${term.term}-${index}`
-                const isExpanded = expandedRows[termKey]
+                const termKey = `${term.term}-${index}`;
+                const isExpanded = expandedRows[termKey];
 
                 return (
                   <motion.tr
@@ -399,7 +345,9 @@ export function TermsTable({ terms }: TermsTableProps) {
                     className="group"
                     initial={false}
                     animate={{
-                      backgroundColor: isExpanded ? "hsl(248 39% 98%)" : "transparent",
+                      backgroundColor: isExpanded
+                        ? "hsl(248 39% 98%)"
+                        : "transparent",
                     }}
                     transition={{ duration: 0.2 }}
                   >
@@ -410,22 +358,35 @@ export function TermsTable({ terms }: TermsTableProps) {
                           onClick={() => toggleRowExpanded(termKey)}
                         >
                           <div className="flex justify-center py-4">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-slate-100">
-                              <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-slate-100"
+                            >
+                              <motion.div
+                                animate={{ rotate: isExpanded ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
                                 <ChevronDown className="h-4 w-4 text-slate-600" />
                               </motion.div>
                               <span className="sr-only">Toggle details</span>
                             </Button>
                           </div>
-                          <div className="py-4 px-4 font-semibold text-left text-slate-800">{term.term}</div>
+                          <div className="py-4 px-4 font-semibold text-left text-slate-800">
+                            {term.term}
+                          </div>
                           <div className="py-4 px-4 text-left">
                             <span
                               className={`font-medium ${term.category === "responsibilities" ? "text-blue-600" : "text-red-600"}`}
                             >
-                              {term.category === "responsibilities" ? "Responsibility" : "Skill"}
+                              {term.category === "responsibilities"
+                                ? "Responsibility"
+                                : "Skill"}
                             </span>
                           </div>
-                          <div className="py-4 px-4 text-left font-semibold text-slate-700">{term.count}</div>
+                          <div className="py-4 px-4 text-left font-semibold text-slate-700">
+                            {term.count}
+                          </div>
                         </div>
 
                         <AnimatePresence>
@@ -449,19 +410,27 @@ export function TermsTable({ terms }: TermsTableProps) {
                                         Companies & Roles
                                       </h4>
                                       <div className="flex flex-wrap gap-2">
-                                        {term.sources && term.sources.length > 0 ? (
+                                        {term.sources &&
+                                        term.sources.length > 0 ? (
                                           term.sources.map((source, idx) => (
                                             <motion.div
                                               key={idx}
-                                              initial={{ scale: 0.8, opacity: 0 }}
+                                              initial={{
+                                                scale: 0.8,
+                                                opacity: 0,
+                                              }}
                                               animate={{ scale: 1, opacity: 1 }}
-                                              transition={{ delay: 0.1 + idx * 0.05, duration: 0.2 }}
+                                              transition={{
+                                                delay: 0.1 + idx * 0.05,
+                                                duration: 0.2,
+                                              }}
                                             >
                                               <Badge
                                                 variant="outline"
                                                 className="px-3 py-1 bg-white/80 border-slate-300 text-slate-700 font-medium"
                                               >
-                                                {source && typeof source === "object"
+                                                {source &&
+                                                typeof source === "object"
                                                   ? `${String(source.company || "Unknown Company")} - ${String(source.role || "Unknown Role")}`
                                                   : "Unknown Source"}
                                               </Badge>
@@ -483,7 +452,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                       </div>
                     </TableCell>
                   </motion.tr>
-                )
+                );
               })
             )}
           </TableBody>
@@ -494,5 +463,5 @@ export function TermsTable({ terms }: TermsTableProps) {
         Showing {sortedTerms.length} of {sanitizedTerms.length} terms
       </div>
     </div>
-  )
+  );
 }

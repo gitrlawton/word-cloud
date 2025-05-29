@@ -1,35 +1,56 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { TermsCloud } from "@/components/terms-cloud"
-import { TermsTable } from "@/components/terms-table"
-import { AutoTermsCloud } from "@/components/auto-terms-cloud"
-import { AutoTermsTable } from "@/components/auto-terms-table"
-import { AutocompleteInput } from "@/components/autocomplete-input"
-import { useToast } from "@/hooks/use-toast"
-import { PlusCircle, RotateCw, AlertCircle, Building, Briefcase, Search, Zap } from "lucide-react"
-import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { TermsCloud } from "@/components/terms-cloud";
+import { TermsTable } from "@/components/terms-table";
+import { AutoTermsCloud } from "@/components/auto-terms-cloud";
+import { AutoTermsTable } from "@/components/auto-terms-table";
+import { AutocompleteInput } from "@/components/autocomplete-input";
+import { useToast } from "@/hooks/use-toast";
+import {
+  PlusCircle,
+  RotateCw,
+  AlertCircle,
+  Building,
+  Briefcase,
+  Search,
+  Zap,
+} from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type TermCount = {
-  term: string
-  count: number
-  category: "responsibilities" | "qualifications"
+  term: string;
+  count: number;
+  category: "responsibilities" | "qualifications";
   sources?: Array<{
-    company: string
-    role: string
-  }>
-}
+    company: string;
+    role: string;
+  }>;
+};
 
-const CHARACTER_LIMIT = 650
+const CHARACTER_LIMIT = 650;
 
 const EXPERIENCE_LEVELS = [
   "Intern",
@@ -38,7 +59,7 @@ const EXPERIENCE_LEVELS = [
   "Senior (6-10 years)",
   "Staff/Principal (10+ years)",
   "Executive/Leadership",
-]
+];
 
 const SECTORS = [
   "Technology",
@@ -51,112 +72,130 @@ const SECTORS = [
   "Media & Entertainment",
   "Government",
   "Non-profit",
-]
+];
 
-export function TermsSkillsGenerator() {
-  const [mode, setMode] = useState<"manual" | "auto">("manual")
+interface TermsSkillsGeneratorProps {
+  mode: "manual" | "auto";
+  onModeChange: (mode: "manual" | "auto") => void;
+}
 
+export function TermsSkillsGenerator({
+  mode,
+  onModeChange,
+}: TermsSkillsGeneratorProps) {
   // Manual input state
-  const [company, setCompany] = useState("")
-  const [role, setRole] = useState("")
-  const [responsibilities, setResponsibilities] = useState("")
-  const [qualifications, setQualifications] = useState("")
-  const [responsibilitiesChars, setResponsibilitiesChars] = useState(0)
-  const [qualificationsChars, setQualificationsChars] = useState(0)
+  const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
+  const [responsibilities, setResponsibilities] = useState("");
+  const [qualifications, setQualifications] = useState("");
+  const [responsibilitiesChars, setResponsibilitiesChars] = useState(0);
+  const [qualificationsChars, setQualificationsChars] = useState(0);
 
   // Auto generation state
-  const [autoRole, setAutoRole] = useState("")
-  const [autoSector, setAutoSector] = useState("")
-  const [autoExperience, setAutoExperience] = useState("")
-  const [autoCompany, setAutoCompany] = useState("")
+  const [autoRole, setAutoRole] = useState("");
+  const [autoSector, setAutoSector] = useState("");
+  const [autoExperience, setAutoExperience] = useState("");
+  const [autoCompany, setAutoCompany] = useState("");
 
   // Manual data state (separate from auto-generated)
-  const [manualTermsData, setManualTermsData] = useState<TermCount[]>([])
-  const [manualTotalListings, setManualTotalListings] = useState(0)
+  const [manualTermsData, setManualTermsData] = useState<TermCount[]>([]);
+  const [manualTotalListings, setManualTotalListings] = useState(0);
 
   // Auto-generated data state (separate from manual)
-  const [autoTermsData, setAutoTermsData] = useState<TermCount[]>([])
-  const [autoTotalListings, setAutoTotalListings] = useState(0)
+  const [autoTermsData, setAutoTermsData] = useState<TermCount[]>([]);
+  const [autoTotalListings, setAutoTotalListings] = useState(0);
 
   // Shared state
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [activeTab, setActiveTab] = useState<"cloud" | "table">("cloud")
-  const { toast } = useToast()
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"cloud" | "table">("cloud");
+  const { toast } = useToast();
 
   // Extract unique companies and roles for autocomplete from manual data only
   const { previousCompanies, previousRoles } = useMemo(() => {
-    const companiesSet = new Set<string>()
-    const rolesSet = new Set<string>()
+    const companiesSet = new Set<string>();
+    const rolesSet = new Set<string>();
 
     manualTermsData.forEach((term) => {
       if (term.sources) {
         term.sources.forEach((source) => {
           if (source && typeof source === "object") {
-            const companyName = String(source.company || "").trim()
-            const roleName = String(source.role || "").trim()
+            const companyName = String(source.company || "").trim();
+            const roleName = String(source.role || "").trim();
 
-            if (companyName && companyName !== "Unknown Company" && companyName !== "Market Research") {
-              companiesSet.add(companyName)
+            if (
+              companyName &&
+              companyName !== "Unknown Company" &&
+              companyName !== "Market Research"
+            ) {
+              companiesSet.add(companyName);
             }
-            if (roleName && roleName !== "Unknown Role" && !roleName.includes("(")) {
-              rolesSet.add(roleName)
+            if (
+              roleName &&
+              roleName !== "Unknown Role" &&
+              !roleName.includes("(")
+            ) {
+              rolesSet.add(roleName);
             }
           }
-        })
+        });
       }
-    })
+    });
 
     return {
       previousCompanies: Array.from(companiesSet).sort(),
       previousRoles: Array.from(rolesSet).sort(),
-    }
-  }, [manualTermsData])
+    };
+  }, [manualTermsData]);
 
   // Update character counts when text changes
   useEffect(() => {
-    setResponsibilitiesChars(responsibilities.length)
-  }, [responsibilities])
+    setResponsibilitiesChars(responsibilities.length);
+  }, [responsibilities]);
 
   useEffect(() => {
-    setQualificationsChars(qualifications.length)
-  }, [qualifications])
+    setQualificationsChars(qualifications.length);
+  }, [qualifications]);
 
-  const handleResponsibilitiesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    setResponsibilities(value)
-  }
+  const handleResponsibilitiesChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    setResponsibilities(value);
+  };
 
-  const handleQualificationsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    setQualifications(value)
-  }
+  const handleQualificationsChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value;
+    setQualifications(value);
+  };
 
   const getCharacterCountColor = (count: number) => {
-    const remaining = CHARACTER_LIMIT - count
-    if (remaining <= 0) return "text-red-600"
-    if (remaining < CHARACTER_LIMIT * 0.1) return "text-amber-600"
-    return "text-slate-500"
-  }
+    const remaining = CHARACTER_LIMIT - count;
+    if (remaining <= 0) return "text-red-600";
+    if (remaining < CHARACTER_LIMIT * 0.1) return "text-amber-600";
+    return "text-slate-500";
+  };
 
   const getProgressColor = (count: number) => {
-    const remaining = CHARACTER_LIMIT - count
-    if (remaining <= 0) return "bg-red-500"
-    if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500"
-    return "bg-blue-500"
-  }
+    const remaining = CHARACTER_LIMIT - count;
+    if (remaining <= 0) return "bg-red-500";
+    if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500";
+    return "bg-blue-500";
+  };
 
   const getProgressValue = (count: number) => {
-    const percentage = (count / CHARACTER_LIMIT) * 100
-    return Math.min(percentage, 100)
-  }
+    const percentage = (count / CHARACTER_LIMIT) * 100;
+    return Math.min(percentage, 100);
+  };
 
   const isOverLimit = (count: number) => {
-    return count > CHARACTER_LIMIT
-  }
+    return count > CHARACTER_LIMIT;
+  };
 
   const getRemainingChars = (count: number) => {
-    return CHARACTER_LIMIT - count
-  }
+    return CHARACTER_LIMIT - count;
+  };
 
   const addToCloudManual = async () => {
     if (!responsibilities.trim() && !qualifications.trim()) {
@@ -164,20 +203,24 @@ export function TermsSkillsGenerator() {
         title: "No content provided",
         description: "Please add some job listing content to analyze.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    if (isOverLimit(responsibilitiesChars) || isOverLimit(qualificationsChars)) {
+    if (
+      isOverLimit(responsibilitiesChars) ||
+      isOverLimit(qualificationsChars)
+    ) {
       toast({
         title: "Character limit exceeded",
-        description: "Please reduce the text to fit within the 650 character limit.",
+        description:
+          "Please reduce the text to fit within the 650 character limit.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsAnalyzing(true)
+    setIsAnalyzing(true);
 
     try {
       const response = await fetch("/api/analyze-skills", {
@@ -189,53 +232,54 @@ export function TermsSkillsGenerator() {
           responsibilities,
           qualifications,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
+        throw new Error(`Error: ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!data.terms) {
-        throw new Error("Invalid response format")
+        throw new Error("Invalid response format");
       }
 
       const sourceInfo = {
         company: company.trim() || "Unknown Company",
         role: role.trim() || "Unknown Role",
-      }
+      };
 
       const termsWithSource = data.terms.map((term: TermCount) => ({
         ...term,
         count: typeof term.count === "number" ? term.count : 1,
         sources: [sourceInfo],
-      }))
+      }));
 
-      const updatedTerms = mergeTerms(manualTermsData, termsWithSource)
-      setManualTermsData(updatedTerms)
-      setManualTotalListings((prev) => prev + 1) // Add 1 for manual input
+      const updatedTerms = mergeTerms(manualTermsData, termsWithSource);
+      setManualTermsData(updatedTerms);
+      setManualTotalListings((prev) => prev + 1); // Add 1 for manual input
 
       toast({
         title: "Analysis complete",
         description: `Added ${data.terms.length} terms to your manual cloud.`,
-      })
+      });
 
-      setResponsibilities("")
-      setQualifications("")
-      setCompany("")
-      setRole("")
+      setResponsibilities("");
+      setQualifications("");
+      setCompany("");
+      setRole("");
     } catch (error) {
-      console.error("Error analyzing job listing:", error)
+      console.error("Error analyzing job listing:", error);
       toast({
         title: "Analysis failed",
-        description: "There was an error analyzing the job listing. Please try again.",
+        description:
+          "There was an error analyzing the job listing. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsAnalyzing(false)
+      setIsAnalyzing(false);
     }
-  }
+  };
 
   const autoGenerate = async () => {
     if (!autoRole.trim() || !autoExperience.trim()) {
@@ -243,11 +287,11 @@ export function TermsSkillsGenerator() {
         title: "Missing required fields",
         description: "Please provide both role and experience level.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsAnalyzing(true)
+    setIsAnalyzing(true);
 
     try {
       const response = await fetch("/api/auto-generate", {
@@ -261,16 +305,16 @@ export function TermsSkillsGenerator() {
           experience: autoExperience,
           company: autoCompany,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
+        throw new Error(`Error: ${response.status}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!data.terms) {
-        throw new Error("Invalid response format")
+        throw new Error("Invalid response format");
       }
 
       // The auto-generated data already includes sources from the API
@@ -280,54 +324,64 @@ export function TermsSkillsGenerator() {
         sources:
           Array.isArray(term.sources) && term.sources.length > 0
             ? term.sources
-            : [{ company: autoCompany.trim() || "Market Research", role: `${autoRole} (${autoExperience})` }],
-      }))
+            : [
+                {
+                  company: autoCompany.trim() || "Market Research",
+                  role: `${autoRole} (${autoExperience})`,
+                },
+              ],
+      }));
 
-      const updatedTerms = mergeTerms(autoTermsData, termsWithValidatedSources)
-      setAutoTermsData(updatedTerms)
+      const updatedTerms = mergeTerms(autoTermsData, termsWithValidatedSources);
+      setAutoTermsData(updatedTerms);
 
       // Add the total listings from the API response
       if (typeof data.totalListings === "number") {
-        setAutoTotalListings((prev) => prev + data.totalListings)
+        setAutoTotalListings((prev) => prev + data.totalListings);
       }
 
       toast({
         title: "Auto-generation complete",
         description: `Added ${data.terms.length} terms from ${data.totalListings || 0} job listings to your auto-generated cloud.`,
-      })
+      });
 
-      setAutoRole("")
-      setAutoSector("")
-      setAutoExperience("")
-      setAutoCompany("")
+      setAutoRole("");
+      setAutoSector("");
+      setAutoExperience("");
+      setAutoCompany("");
     } catch (error) {
-      console.error("Error auto-generating:", error)
+      console.error("Error auto-generating:", error);
       toast({
         title: "Auto-generation failed",
-        description: "There was an error researching job listings. Please try again.",
+        description:
+          "There was an error researching job listings. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsAnalyzing(false)
+      setIsAnalyzing(false);
     }
-  }
+  };
 
-  const mergeTerms = (existingTerms: TermCount[], newTerms: TermCount[]): TermCount[] => {
-    const termMap = new Map<string, TermCount>()
+  const mergeTerms = (
+    existingTerms: TermCount[],
+    newTerms: TermCount[]
+  ): TermCount[] => {
+    const termMap = new Map<string, TermCount>();
 
     existingTerms.forEach((term) => {
       termMap.set(term.term, {
         ...term,
         count: typeof term.count === "number" ? term.count : 1,
-      })
-    })
+      });
+    });
 
     newTerms.forEach((newTerm) => {
-      const existingTerm = termMap.get(newTerm.term)
+      const existingTerm = termMap.get(newTerm.term);
 
       if (existingTerm) {
-        const existingCount = typeof existingTerm.count === "number" ? existingTerm.count : 0
-        const newCount = typeof newTerm.count === "number" ? newTerm.count : 1
+        const existingCount =
+          typeof existingTerm.count === "number" ? existingTerm.count : 0;
+        const newCount = typeof newTerm.count === "number" ? newTerm.count : 1;
 
         termMap.set(newTerm.term, {
           ...existingTerm,
@@ -338,91 +392,69 @@ export function TermsSkillsGenerator() {
               (newSource) =>
                 !(existingTerm.sources || []).some(
                   (existingSource) =>
-                    existingSource.company === newSource.company && existingSource.role === newSource.role,
-                ),
+                    existingSource.company === newSource.company &&
+                    existingSource.role === newSource.role
+                )
             ),
           ],
-        })
+        });
       } else {
         termMap.set(newTerm.term, {
           ...newTerm,
           count: typeof newTerm.count === "number" ? newTerm.count : 1,
-        })
+        });
       }
-    })
+    });
 
-    return Array.from(termMap.values()).sort((a, b) => b.count - a.count)
-  }
+    return Array.from(termMap.values()).sort((a, b) => b.count - a.count);
+  };
 
   const resetManualCloud = () => {
-    if (manualTermsData.length === 0) return
+    if (manualTermsData.length === 0) return;
 
-    setManualTermsData([])
-    setManualTotalListings(0)
+    setManualTermsData([]);
+    setManualTotalListings(0);
     toast({
       title: "Manual cloud reset",
       description: "Your manual terms cloud has been reset.",
-    })
-  }
+    });
+  };
 
   const resetAutoCloud = () => {
-    if (autoTermsData.length === 0) return
+    if (autoTermsData.length === 0) return;
 
-    setAutoTermsData([])
-    setAutoTotalListings(0)
+    setAutoTermsData([]);
+    setAutoTotalListings(0);
     toast({
       title: "Auto-generated cloud reset",
       description: "Your auto-generated terms cloud has been reset.",
-    })
-  }
+    });
+  };
 
   const calculateTotalMentions = (terms: TermCount[]) => {
     return terms.reduce((sum, term) => {
-      const count = typeof term.count === "number" ? term.count : 0
-      return sum + count
-    }, 0)
-  }
+      const count = typeof term.count === "number" ? term.count : 0;
+      return sum + count;
+    }, 0);
+  };
 
   // Check if sector or company fields should be disabled
-  const isSectorDisabled = autoCompany.trim() !== ""
-  const isCompanyDisabled = autoSector.trim() !== ""
+  const isSectorDisabled = autoCompany.trim() !== "";
+  const isCompanyDisabled = autoSector.trim() !== "";
 
   // Get current data based on mode
-  const currentTermsData = mode === "manual" ? manualTermsData : autoTermsData
-  const currentTotalListings = mode === "manual" ? manualTotalListings : autoTotalListings
-  const responsibilitiesCount = currentTermsData.filter((term) => term.category === "responsibilities").length
-  const skillsCount = currentTermsData.filter((term) => term.category === "qualifications").length
+  const currentTermsData = mode === "manual" ? manualTermsData : autoTermsData;
+  const currentTotalListings =
+    mode === "manual" ? manualTotalListings : autoTotalListings;
+  const responsibilitiesCount = currentTermsData.filter(
+    (term) => term.category === "responsibilities"
+  ).length;
+  const skillsCount = currentTermsData.filter(
+    (term) => term.category === "qualifications"
+  ).length;
 
   return (
     <div className="grid gap-8 max-w-7xl mx-auto">
-      {/* Mode Selection */}
-      <div className="flex justify-center gap-4">
-        <Button
-          variant={mode === "manual" ? "default" : "outline"}
-          onClick={() => setMode("manual")}
-          className={
-            mode === "manual"
-              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-              : "border-slate-300 text-slate-700 hover:bg-slate-50"
-          }
-        >
-          <Search className="mr-2 h-4 w-4" />
-          Manual Input
-        </Button>
-        <Button
-          variant={mode === "auto" ? "default" : "outline"}
-          onClick={() => setMode("auto")}
-          className={
-            mode === "auto"
-              ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
-              : "border-slate-300 text-slate-700 hover:bg-slate-50"
-          }
-        >
-          <Zap className="mr-2 h-4 w-4" />
-          Auto Generate
-        </Button>
-      </div>
-
       {mode === "manual" ? (
         <>
           {/* Manual Input Mode */}
@@ -433,7 +465,9 @@ export function TermsSkillsGenerator() {
                   <Building className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-slate-800">Job Listing Information</CardTitle>
+                  <CardTitle className="text-slate-800">
+                    Job Listing Information
+                  </CardTitle>
                   <CardDescription className="text-slate-600">
                     Enter company and role information about the job listing
                   </CardDescription>
@@ -443,7 +477,10 @@ export function TermsSkillsGenerator() {
             <CardContent className="p-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="company" className="text-slate-700 font-medium">
+                  <Label
+                    htmlFor="company"
+                    className="text-slate-700 font-medium"
+                  >
                     Company (Optional)
                   </Label>
                   <AutocompleteInput
@@ -482,8 +519,12 @@ export function TermsSkillsGenerator() {
                     <Briefcase className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-slate-800">What You Will Do</CardTitle>
-                    <CardDescription className="text-slate-600">Paste job responsibilities here</CardDescription>
+                    <CardTitle className="text-slate-800">
+                      What You Will Do
+                    </CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Paste job responsibilities here
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -503,11 +544,14 @@ export function TermsSkillsGenerator() {
                     indicatorClassName={getProgressColor(responsibilitiesChars)}
                   />
                 </div>
-                <div className={`text-sm font-medium ${getCharacterCountColor(responsibilitiesChars)}`}>
+                <div
+                  className={`text-sm font-medium ${getCharacterCountColor(responsibilitiesChars)}`}
+                >
                   {isOverLimit(responsibilitiesChars) ? (
                     <span className="flex items-center text-red-600 font-semibold">
                       <AlertCircle className="h-4 w-4 mr-2" />
-                      {Math.abs(getRemainingChars(responsibilitiesChars))} characters over limit
+                      {Math.abs(getRemainingChars(responsibilitiesChars))}{" "}
+                      characters over limit
                     </span>
                   ) : (
                     `${responsibilitiesChars} / ${CHARACTER_LIMIT} characters`
@@ -525,8 +569,12 @@ export function TermsSkillsGenerator() {
                     <Briefcase className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div>
-                    <CardTitle className="text-slate-800">Preferred Skills</CardTitle>
-                    <CardDescription className="text-slate-600">Paste job qualifications here</CardDescription>
+                    <CardTitle className="text-slate-800">
+                      Preferred Skills
+                    </CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Paste job qualifications here
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -546,11 +594,14 @@ export function TermsSkillsGenerator() {
                     indicatorClassName={getProgressColor(qualificationsChars)}
                   />
                 </div>
-                <div className={`text-sm font-medium ${getCharacterCountColor(qualificationsChars)}`}>
+                <div
+                  className={`text-sm font-medium ${getCharacterCountColor(qualificationsChars)}`}
+                >
                   {isOverLimit(qualificationsChars) ? (
                     <span className="flex items-center text-red-600 font-semibold">
                       <AlertCircle className="h-4 w-4 mr-2" />
-                      {Math.abs(getRemainingChars(qualificationsChars))} characters over limit
+                      {Math.abs(getRemainingChars(qualificationsChars))}{" "}
+                      characters over limit
                     </span>
                   ) : (
                     `${qualificationsChars} / ${CHARACTER_LIMIT} characters`
@@ -607,9 +658,12 @@ export function TermsSkillsGenerator() {
                   <Zap className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-slate-800">Auto Generate from Market Research</CardTitle>
+                  <CardTitle className="text-slate-800">
+                    Auto Generate from Market Research
+                  </CardTitle>
                   <CardDescription className="text-slate-600">
-                    Specify criteria and we'll research current job listings for you
+                    Specify criteria and we'll research current job listings for
+                    you
                   </CardDescription>
                 </div>
               </div>
@@ -617,7 +671,10 @@ export function TermsSkillsGenerator() {
             <CardContent className="p-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="autoRole" className="text-slate-700 font-medium">
+                  <Label
+                    htmlFor="autoRole"
+                    className="text-slate-700 font-medium"
+                  >
                     Role <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -629,10 +686,16 @@ export function TermsSkillsGenerator() {
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label htmlFor="autoExperience" className="text-slate-700 font-medium">
+                  <Label
+                    htmlFor="autoExperience"
+                    className="text-slate-700 font-medium"
+                  >
                     Experience Level <span className="text-red-500">*</span>
                   </Label>
-                  <Select value={autoExperience} onValueChange={setAutoExperience}>
+                  <Select
+                    value={autoExperience}
+                    onValueChange={setAutoExperience}
+                  >
                     <SelectTrigger className="border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 bg-white">
                       <SelectValue placeholder="Select experience level" />
                     </SelectTrigger>
@@ -666,31 +729,42 @@ export function TermsSkillsGenerator() {
                       htmlFor="autoSector"
                       className={`font-medium ${isSectorDisabled ? "text-slate-400" : "text-slate-700"}`}
                     >
-                      Sector {isSectorDisabled && "(disabled - clear Company to enable)"}
+                      Sector{" "}
+                      {isSectorDisabled &&
+                        "(disabled - clear Company to enable)"}
                     </Label>
                     <Select
                       value={autoSector}
                       onValueChange={(value) => {
                         if (value === "__CLEAR__") {
-                          setAutoSector("")
+                          setAutoSector("");
                         } else {
-                          setAutoSector(value)
+                          setAutoSector(value);
                         }
                       }}
                       disabled={isSectorDisabled}
                     >
                       <SelectTrigger
                         className={`border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 ${
-                          isSectorDisabled ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-white"
+                          isSectorDisabled
+                            ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                            : "bg-white"
                         }`}
                       >
                         <SelectValue
-                          placeholder={isSectorDisabled ? "Clear Company field to enable" : "Select sector"}
+                          placeholder={
+                            isSectorDisabled
+                              ? "Clear Company field to enable"
+                              : "Select sector"
+                          }
                         />
                       </SelectTrigger>
                       <SelectContent>
                         {autoSector && (
-                          <SelectItem value="__CLEAR__" className="text-slate-500 italic">
+                          <SelectItem
+                            value="__CLEAR__"
+                            className="text-slate-500 italic"
+                          >
                             Clear selection
                           </SelectItem>
                         )}
@@ -707,16 +781,24 @@ export function TermsSkillsGenerator() {
                       htmlFor="autoCompany"
                       className={`font-medium ${isCompanyDisabled ? "text-slate-400" : "text-slate-700"}`}
                     >
-                      Company {isCompanyDisabled && "(disabled - clear Sector to enable)"}
+                      Company{" "}
+                      {isCompanyDisabled &&
+                        "(disabled - clear Sector to enable)"}
                     </Label>
                     <Input
                       id="autoCompany"
-                      placeholder={isCompanyDisabled ? "Clear Sector field to enable" : "e.g., Google, Meta, Apple"}
+                      placeholder={
+                        isCompanyDisabled
+                          ? "Clear Sector field to enable"
+                          : "e.g., Google, Meta, Apple"
+                      }
                       value={autoCompany}
                       onChange={(e) => setAutoCompany(e.target.value)}
                       disabled={isCompanyDisabled}
                       className={`border-slate-200 focus:border-purple-400 focus:ring-purple-400/20 ${
-                        isCompanyDisabled ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-white"
+                        isCompanyDisabled
+                          ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          : "bg-white"
                       }`}
                     />
                   </div>
@@ -737,7 +819,10 @@ export function TermsSkillsGenerator() {
                       Searching specifically at <strong>{autoCompany}</strong>
                     </span>
                   ) : (
-                    <span>Optionally narrow your search by sector or specific company</span>
+                    <span>
+                      Optionally narrow your search by sector or specific
+                      company
+                    </span>
                   )}
                 </div>
               </div>
@@ -748,7 +833,9 @@ export function TermsSkillsGenerator() {
             <Button
               size="lg"
               onClick={autoGenerate}
-              disabled={isAnalyzing || !autoRole.trim() || !autoExperience.trim()}
+              disabled={
+                isAnalyzing || !autoRole.trim() || !autoExperience.trim()
+              }
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
             >
               {isAnalyzing ? (
@@ -759,7 +846,7 @@ export function TermsSkillsGenerator() {
               ) : (
                 <>
                   <Zap className="mr-3 h-5 w-5" />
-                  Auto Generate
+                  Generate
                 </>
               )}
             </Button>
@@ -782,23 +869,34 @@ export function TermsSkillsGenerator() {
         <Card className="bg-white border-slate-300 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300">
             <CardTitle className="text-slate-800 text-2xl">
-              {mode === "manual" ? "Manual Terms & Skills Cloud" : "Auto-Generated Terms & Skills Cloud"}
+              {mode === "manual"
+                ? "Manual Terms & Skills Cloud"
+                : "Auto-Generated Terms & Skills Cloud"}
             </CardTitle>
             <CardDescription className="text-slate-600 text-lg">
-              Showing {currentTermsData.length} unique terms ({responsibilitiesCount} responsibilities, {skillsCount}{" "}
-              skills) from {calculateTotalMentions(currentTermsData)} total mentions across {currentTotalListings} total
-              listings
+              Showing {currentTermsData.length} unique terms (
+              {responsibilitiesCount} responsibilities, {skillsCount} skills)
+              from {calculateTotalMentions(currentTermsData)} total mentions
+              across {currentTotalListings} total listings
             </CardDescription>
             <Tabs
               defaultValue="cloud"
-              onValueChange={(value) => setActiveTab(value as "cloud" | "table")}
+              onValueChange={(value) =>
+                setActiveTab(value as "cloud" | "table")
+              }
               className="mt-6"
             >
               <TabsList className="grid w-[400px] grid-cols-2 bg-slate-100 p-1 border border-slate-300">
-                <TabsTrigger value="cloud" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="cloud"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
                   Cloud View
                 </TabsTrigger>
-                <TabsTrigger value="table" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="table"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
                   Table View
                 </TabsTrigger>
               </TabsList>
@@ -821,5 +919,5 @@ export function TermsSkillsGenerator() {
         </Card>
       )}
     </div>
-  )
+  );
 }

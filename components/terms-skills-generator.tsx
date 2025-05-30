@@ -109,6 +109,7 @@ export function TermsSkillsGenerator({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [activeTab, setActiveTab] = useState<"cloud" | "table">("cloud");
   const { toast } = useToast();
+  const [isCloudGenerated, setIsCloudGenerated] = useState(false);
 
   // Extract unique companies and roles for autocomplete from manual data only
   const { previousCompanies, previousRoles } = useMemo(() => {
@@ -832,9 +833,15 @@ export function TermsSkillsGenerator({
           <div className="flex justify-center gap-6">
             <Button
               size="lg"
-              onClick={autoGenerate}
+              onClick={() => {
+                autoGenerate();
+                setIsCloudGenerated(true);
+              }}
               disabled={
-                isAnalyzing || !autoRole.trim() || !autoExperience.trim()
+                isAnalyzing ||
+                !autoRole.trim() ||
+                !autoExperience.trim() ||
+                isCloudGenerated
               }
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
             >
@@ -855,7 +862,10 @@ export function TermsSkillsGenerator({
               <Button
                 size="lg"
                 variant="outline"
-                onClick={resetAutoCloud}
+                onClick={() => {
+                  resetAutoCloud();
+                  setIsCloudGenerated(false);
+                }}
                 className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-lg shadow-slate-200 hover:shadow-xl hover:shadow-slate-300 transition-all duration-300 px-8 py-6 text-lg font-semibold"
               >
                 Reset Auto Cloud

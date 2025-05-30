@@ -134,8 +134,9 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-center items-center gap-4"></div>
+
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-        {/* Category Filter Buttons */}
         <div className="flex gap-3">
           <Button
             variant={filter === "all" ? "default" : "outline"}
@@ -176,11 +177,8 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
             {terms.filter((t) => t.category === "qualifications").length})
           </Button>
         </div>
-
-        {/* Role Filter Dropdown */}
         {availableRoles.length > 0 && (
           <div className="flex items-center gap-2">
-            <Briefcase className="h-4 w-4 text-slate-600" />
             <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger className="w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
                 <SelectValue placeholder="Filter by role" />
@@ -196,18 +194,6 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
             </Select>
           </div>
         )}
-      </div>
-
-      {/* Legend for colors */}
-      <div className="flex justify-center gap-8 text-sm font-medium">
-        <div className="flex items-center gap-3">
-          <div className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-sm"></div>
-          <span className="text-slate-700">Responsibilities</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-4 h-4 rounded-full bg-gradient-to-r from-red-500 to-red-600 shadow-sm"></div>
-          <span className="text-slate-700">Skills</span>
-        </div>
       </div>
 
       <div className="p-8 bg-gradient-to-br from-slate-50 via-white to-blue-50 border border-slate-300 min-h-[350px] text-center">

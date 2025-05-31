@@ -157,7 +157,7 @@ export function TermsTable({ terms }: TermsTableProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input
@@ -295,31 +295,35 @@ export function TermsTable({ terms }: TermsTableProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
-              <TableHead className="w-[40px]"></TableHead>
-              <TableHead className="min-w-[200px]">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort("term")}
-                  className="font-semibold h-auto p-0 hover:bg-transparent text-slate-700 hover:text-slate-900"
-                >
-                  Term
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead className="w-[150px] font-semibold text-slate-700">
-                Category
-              </TableHead>
-              <TableHead className="w-[100px]">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort("count")}
-                  className="font-semibold h-auto p-0 hover:bg-transparent text-slate-700 hover:text-slate-900"
-                >
-                  Count
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
+              <TableHead className="p-0">
+                <div className="grid grid-cols-[40px_1fr_150px_100px] items-center">
+                  <div className="flex justify-center py-4"></div>
+                  <div className="py-4 px-4 font-semibold text-slate-700 flex items-center">
+                    <span>Term</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("term")}
+                      className="font-semibold h-auto p-0 hover:bg-transparent hover:text-slate-900"
+                    >
+                      <ArrowUpDown className="ml-4 h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="py-4 px-4 font-semibold text-slate-700">
+                    Category
+                  </div>
+                  <div className="py-4 px-4 font-semibold text-slate-700 flex items-center">
+                    <span>Count</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("count")}
+                      className="font-semibold h-auto p-0 hover:bg-transparent hover:text-slate-900"
+                    >
+                      <ArrowUpDown className="ml-4 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </TableHead>
             </TableRow>
           </TableHeader>

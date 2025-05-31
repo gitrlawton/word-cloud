@@ -877,7 +877,7 @@ export function TermsSkillsGenerator({
 
       {currentTermsData.length > 0 && (
         <Card className="bg-white border-slate-300 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300">
+          <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300 text-center">
             <CardTitle className="text-slate-800 text-2xl">
               {mode === "manual"
                 ? "Manual Terms & Skills Cloud"
@@ -894,9 +894,9 @@ export function TermsSkillsGenerator({
               onValueChange={(value) =>
                 setActiveTab(value as "cloud" | "table")
               }
-              className="mt-6"
+              className="pt-4"
             >
-              <TabsList className="grid w-[400px] grid-cols-2 bg-slate-100 p-1 border border-slate-300">
+              <TabsList className="grid w-fit mx-auto grid-cols-2 bg-slate-100 p-1 border border-slate-300">
                 <TabsTrigger
                   value="cloud"
                   className="data-[state=active]:bg-white data-[state=active]:shadow-sm"

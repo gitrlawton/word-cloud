@@ -612,7 +612,7 @@ export function TermsSkillsGenerator({
             </Card>
           </div>
 
-          <div className="flex justify-center gap-6">
+          <div className="flex flex-col justify-center gap-6 min-[437px]:flex-row">
             <Button
               size="lg"
               onClick={addToCloudManual}
@@ -830,7 +830,7 @@ export function TermsSkillsGenerator({
             </CardContent>
           </Card>
 
-          <div className="flex justify-center gap-6">
+          <div className="flex flex-col justify-center gap-6 min-[437px]:flex-row">
             <Button
               size="lg"
               onClick={() => {

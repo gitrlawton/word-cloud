@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase } from "lucide-react";
 import type { TermCount } from "./terms-skills-generator";
 
 interface AutoTermsCloudProps {
@@ -68,18 +67,33 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
     }));
 
     const maxCount = Math.max(...sanitizedTerms.map((t) => t.count));
-    const minFontSize = 16;
-    const maxFontSize = 48;
+    const minFontSize = 6;
+
+    // Use responsive font sizing with both a minimum base size and a responsive component
+    const getResponsiveFontSize = (count: number) => {
+      // Calculate the ratio (0 to 1) of this term's count to the max count
+      const ratio = count / maxCount;
+
+      // Base minimum font size in pixels
+      const baseSize = minFontSize;
+
+      // Responsive component that scales with viewport width
+      // The ratio determines how much the term scales with the viewport
+      const responsiveSize = `calc(${baseSize}px + ${ratio * 2.5}vw)`;
+
+      return responsiveSize;
+    };
 
     sanitizedTerms.slice(0, 100).forEach((term) => {
-      const fontSize =
-        minFontSize + (term.count / maxCount) * (maxFontSize - minFontSize);
+      const fontSize = getResponsiveFontSize(term.count);
 
       const span = document.createElement("span");
       span.textContent = term.term;
-      span.style.fontSize = `${fontSize}px`;
+      span.style.fontSize = fontSize;
       span.style.padding = "12px";
-      span.style.display = "inline-block";
+      span.style.display = "inline-flex";
+      span.style.alignItems = "center";
+      span.style.justifyContent = "center";
       span.style.cursor = "pointer";
       span.style.transition = "all 0.3s ease";
       span.style.borderRadius = "8px";
@@ -137,7 +151,7 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4"></div>
 
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col min-[437px]:flex-row max-[436px]:w-full gap-3">
           <Button
             variant={filter === "all" ? "default" : "outline"}
             onClick={() => setFilter("all")}
@@ -178,9 +192,9 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
           </Button>
         </div>
         {availableRoles.length > 0 && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-[436px]:w-full">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
+              <SelectTrigger className="max-[436px]:w-full min-[437px]:w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>

@@ -9,8 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase } from "lucide-react";
 import type { TermCount } from "./terms-skills-generator";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TermsCloudProps {
   terms: TermCount[];
@@ -22,6 +22,7 @@ export function TermsCloud({ terms }: TermsCloudProps) {
     "all" | "responsibilities" | "qualifications"
   >("all");
   const [roleFilter, setRoleFilter] = useState<string>("all");
+  const isMobile = useIsMobile();
 
   // Extract unique roles from the terms data
   const availableRoles = Array.from(
@@ -68,18 +69,25 @@ export function TermsCloud({ terms }: TermsCloudProps) {
     }));
 
     const maxCount = Math.max(...sanitizedTerms.map((t) => t.count));
-    const minFontSize = 16;
-    const maxFontSize = 48;
+    const minFontSize = 6;
+
+    const getResponsiveFontSize = (count: number) => {
+      const ratio = count / maxCount;
+      const baseSize = minFontSize;
+      const responsiveSize = `calc(${baseSize}px + ${ratio * 2.5}vw)`;
+      return responsiveSize;
+    };
 
     sanitizedTerms.slice(0, 100).forEach((term) => {
-      const fontSize =
-        minFontSize + (term.count / maxCount) * (maxFontSize - minFontSize);
+      const fontSize = getResponsiveFontSize(term.count);
 
       const span = document.createElement("span");
       span.textContent = term.term;
-      span.style.fontSize = `${fontSize}px`;
+      span.style.fontSize = fontSize;
       span.style.padding = "12px";
-      span.style.display = "inline-block";
+      span.style.display = "inline-flex";
+      span.style.alignItems = "center";
+      span.style.justifyContent = "center";
       span.style.cursor = "pointer";
       span.style.transition = "all 0.3s ease";
       span.style.borderRadius = "8px";
@@ -94,15 +102,6 @@ export function TermsCloud({ terms }: TermsCloudProps) {
         span.style.background =
           "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))";
       }
-
-      // let tooltipText = `${term.term}: ${term.count} occurrences (${term.category === "responsibilities" ? "Responsibility" : "Skill"})`
-      // if (term.sources && term.sources.length > 0) {
-      //   tooltipText += `\nSources: ${term.sources
-      //     .filter((s) => s && typeof s === "object")
-      //     .map((s) => `${String(s.company || "Unknown Company")} - ${String(s.role || "Unknown Role")}`)
-      //     .join(", ")}`
-      // }
-      // span.title = tooltipText
 
       span.addEventListener("mouseover", () => {
         span.style.transform = "scale(1.1) translateY(-2px)";
@@ -138,7 +137,7 @@ export function TermsCloud({ terms }: TermsCloudProps) {
 
       {/* Category Filter Buttons */}
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-        <div className="flex gap-3">
+        <div className="flex flex-col min-[437px]:flex-row max-[436px]:w-full gap-3">
           <Button
             variant={filter === "all" ? "default" : "outline"}
             onClick={() => setFilter("all")}
@@ -179,9 +178,9 @@ export function TermsCloud({ terms }: TermsCloudProps) {
           </Button>
         </div>
         {availableRoles.length > 0 && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-[436px]:w-full">
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
+              <SelectTrigger className="min-[437px]:w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>

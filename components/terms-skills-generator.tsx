@@ -719,7 +719,8 @@ export function TermsSkillsGenerator({
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="bg-white px-4 text-slate-500 font-medium">
-                      Choose either Sector OR Company (not both)
+                      Optionally narrow your search by sector or specific
+                      company
                     </span>
                   </div>
                 </div>
@@ -820,10 +821,7 @@ export function TermsSkillsGenerator({
                       Searching specifically at <strong>{autoCompany}</strong>
                     </span>
                   ) : (
-                    <span>
-                      Optionally narrow your search by sector or specific
-                      company
-                    </span>
+                    <span>Choose either Sector OR Company (not both)</span>
                   )}
                 </div>
               </div>

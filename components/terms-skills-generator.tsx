@@ -31,7 +31,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/components/progress";
 import {
   Select,
   SelectContent,
@@ -182,7 +182,7 @@ export function TermsSkillsGenerator({
     const remaining = CHARACTER_LIMIT - count;
     if (remaining <= 0) return "bg-red-500";
     if (remaining < CHARACTER_LIMIT * 0.1) return "bg-amber-500";
-    return "bg-blue-500";
+    return "bg-green-600";
   };
 
   const getProgressValue = (count: number) => {
@@ -462,7 +462,7 @@ export function TermsSkillsGenerator({
           <Card className="bg-white border-slate-300 shadow-xl rounded">
             <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-300">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
+                <div className="hidden sm:block p-2 bg-blue-100 rounded-lg">
                   <Building className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
@@ -516,7 +516,7 @@ export function TermsSkillsGenerator({
             >
               <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-300">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+                  <div className="hidden sm:block p-2 bg-blue-100 rounded-lg">
                     <Briefcase className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
@@ -566,7 +566,7 @@ export function TermsSkillsGenerator({
             >
               <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-300">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-100 rounded-lg">
+                  <div className="hidden sm:block p-2 bg-indigo-100 rounded-lg">
                     <Briefcase className="h-5 w-5 text-indigo-600" />
                   </div>
                   <div>
@@ -655,7 +655,7 @@ export function TermsSkillsGenerator({
           <Card className="bg-white border-slate-300 shadow-xl rounded">
             <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-slate-300">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
+                <div className="hidden sm:block p-2 bg-purple-100 rounded-lg">
                   <Zap className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
@@ -663,8 +663,8 @@ export function TermsSkillsGenerator({
                     Auto Generate from Market Research
                   </CardTitle>
                   <CardDescription className="text-slate-600">
-                    Specify criteria and we'll research current job listings for
-                    you
+                    Specify criteria and we'll look up current job listing data
+                    for you
                   </CardDescription>
                 </div>
               </div>
@@ -718,8 +718,8 @@ export function TermsSkillsGenerator({
                     <div className="w-full border-t border-slate-300"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-4 text-slate-500 font-medium">
-                      Optionally narrow your search by sector or specific
+                    <span className="bg-white px-4 text-slate-500 font-medium text-center">
+                      Optionally, narrow your search by sector or specific
                       company
                     </span>
                   </div>

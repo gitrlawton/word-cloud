@@ -157,7 +157,7 @@ export function TermsTable({ terms }: TermsTableProps) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-col min-[551px]:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input
@@ -167,7 +167,7 @@ export function TermsTable({ terms }: TermsTableProps) {
               onChange={(e) => setFilterValue(e.target.value)}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2">
             <Button
               variant={categoryFilter === "all" ? "default" : "outline"}
               onClick={() => setCategoryFilter("all")}
@@ -296,7 +296,7 @@ export function TermsTable({ terms }: TermsTableProps) {
           <TableHeader>
             <TableRow className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
               <TableHead className="p-0">
-                <div className="grid grid-cols-[40px_1fr_150px_100px] items-center">
+                <div className="grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_150px_100px] items-center">
                   <div className="flex justify-center py-4"></div>
                   <div className="py-4 px-4 font-semibold text-slate-700 flex items-center">
                     <span>Term</span>
@@ -304,12 +304,12 @@ export function TermsTable({ terms }: TermsTableProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleSort("term")}
-                      className="font-semibold h-auto p-0 hover:bg-transparent hover:text-slate-900"
+                      className="font-semibold h-auto p-0 text-slate-400 hover:bg-transparent hover:text-slate-900"
                     >
                       <ArrowUpDown className="ml-4 h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="py-4 px-4 font-semibold text-slate-700">
+                  <div className="hidden sm:block py-4 px-4 font-semibold text-slate-700">
                     Category
                   </div>
                   <div className="py-4 px-4 font-semibold text-slate-700 flex items-center">
@@ -318,7 +318,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleSort("count")}
-                      className="font-semibold h-auto p-0 hover:bg-transparent hover:text-slate-900"
+                      className="font-semibold h-auto p-0 text-slate-400 hover:bg-transparent hover:text-slate-900"
                     >
                       <ArrowUpDown className="ml-4 h-4 w-4" />
                     </Button>
@@ -358,7 +358,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                     <TableCell colSpan={4} className="p-0">
                       <div className="relative">
                         <div
-                          className="grid grid-cols-[40px_1fr_150px_100px] items-center cursor-pointer hover:bg-slate-50/80 transition-colors"
+                          className="grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_150px_100px] items-center cursor-pointer hover:bg-slate-50/80 transition-colors"
                           onClick={() => toggleRowExpanded(termKey)}
                         >
                           <div className="flex justify-center py-4">
@@ -379,7 +379,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                           <div className="py-4 px-4 font-semibold text-left text-slate-800">
                             {term.term}
                           </div>
-                          <div className="py-4 px-4 text-left">
+                          <div className="hidden sm:block py-4 px-4 text-left">
                             <span
                               className={`font-medium ${term.category === "responsibilities" ? "text-blue-600" : "text-red-600"}`}
                             >

@@ -3,12 +3,16 @@
 import { TermsSkillsGenerator } from "@/components/terms-skills-generator";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { SmallScreenWarning } from "@/components/small-screen-warning";
 
 export default function Home() {
   const [mode, setMode] = useState<"manual" | "auto">("manual");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300">
+      {/* Small Screen Warning */}
+      <SmallScreenWarning />
+
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
@@ -17,8 +21,8 @@ export default function Home() {
               Terms & Skills Cloud
             </h1>
             <p className="text-slate-600 mt-2 text-lg">
-              Analyze job listings to discover the most in-demand skills and
-              responsibilities
+              Analyze job listings to discover the most common role
+              responsibilities and in-demand skills.
             </p>
             {/* Mode Selection */}
 

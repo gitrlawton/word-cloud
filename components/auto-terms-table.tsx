@@ -310,7 +310,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   : "text-red-600 border-red-300 hover:bg-red-50"
               }
             >
-              Skills
+              Qualifications
             </Button>
           </div>
         </div>
@@ -551,7 +551,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                             >
                               {term.category === "responsibilities"
                                 ? "Responsibility"
-                                : "Skill"}
+                                : "Qualification"}
                             </span>
                           </div>
                           <div className="py-4 px-4 text-left font-semibold text-slate-700">

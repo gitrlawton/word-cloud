@@ -531,7 +531,7 @@ export function TermsSkillsGenerator({
               </CardHeader>
               <CardContent className="p-6">
                 <Textarea
-                  placeholder="Copy and paste the 'Responsibilities' or 'What You Will Do' section from job listings..."
+                  placeholder="Copy and paste the 'Responsibilities' or 'What You Will Do' section from a job listing here"
                   className={`min-h-[200px] resize-none border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white ${isOverLimit(responsibilitiesChars) ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : ""}`}
                   value={responsibilities}
                   onChange={handleResponsibilitiesChange}
@@ -581,7 +581,7 @@ export function TermsSkillsGenerator({
               </CardHeader>
               <CardContent className="p-6">
                 <Textarea
-                  placeholder="Copy and paste the 'Qualifications' or 'Preferred Skills' section from job listings..."
+                  placeholder="Copy and paste the 'Qualifications' or 'Preferred Skills' section from a job listing here"
                   className={`min-h-[200px] resize-none border-slate-200 focus:border-indigo-400 focus:ring-indigo-400/20 bg-white ${isOverLimit(qualificationsChars) ? "border-red-300 focus:border-red-400 focus:ring-red-400/20" : ""}`}
                   value={qualifications}
                   onChange={handleQualificationsChange}
@@ -878,14 +878,14 @@ export function TermsSkillsGenerator({
           <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300 text-center">
             <CardTitle className="text-slate-800 text-2xl">
               {mode === "manual"
-                ? "Manual Terms & Skills Cloud"
-                : "Auto-Generated Terms & Skills Cloud"}
+                ? "Manual Skill Cloud"
+                : "Auto-Generated Skill Cloud"}
             </CardTitle>
             <CardDescription className="text-slate-600 text-lg">
-              Showing {currentTermsData.length} unique terms (
-              {responsibilitiesCount} responsibilities, {skillsCount} skills)
-              from {calculateTotalMentions(currentTermsData)} total mentions
-              across {currentTotalListings} total listings
+              Showing {currentTermsData.length} unique skills (
+              {responsibilitiesCount} responsibilities, {skillsCount}{" "}
+              qualifications) from {calculateTotalMentions(currentTermsData)}{" "}
+              total mentions across {currentTotalListings} total listings
             </CardDescription>
             <Tabs
               defaultValue="cloud"

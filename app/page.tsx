@@ -18,11 +18,10 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
-              Terms & Skills Cloud
+              Skill Cloud Generator
             </h1>
             <p className="text-slate-600 mt-2 text-lg">
-              Analyze job listings to discover the most common role
-              responsibilities and in-demand skills.
+              Analyze job listings to discover the most in-demand skills.
             </p>
             {/* Mode Selection */}
 

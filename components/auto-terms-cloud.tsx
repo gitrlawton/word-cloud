@@ -187,7 +187,7 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
                 : "text-red-600 border-red-300 hover:bg-red-50"
             }
           >
-            Skills (
+            Qualifications (
             {terms.filter((t) => t.category === "qualifications").length})
           </Button>
         </div>

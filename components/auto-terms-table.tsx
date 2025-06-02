@@ -265,7 +265,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Filter terms..."
+              placeholder="Filter keywords..."
               className="pl-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white/80"
               value={filterValue}
               onChange={(e) => setFilterValue(e.target.value)}
@@ -292,8 +292,8 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
               size="sm"
               className={
                 categoryFilter === "responsibilities"
-                  ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg"
-                  : "text-blue-600 border-blue-300 hover:bg-blue-50"
+                  ? "bg-gradient-to-r from-purple-600 to-purple-700 shadow-lg"
+                  : "text-purple-600 border-purple-300 hover:bg-purple-50"
               }
             >
               Responsibilities
@@ -306,8 +306,8 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
               size="sm"
               className={
                 categoryFilter === "qualifications"
-                  ? "bg-gradient-to-r from-red-600 to-red-700 shadow-lg"
-                  : "text-red-600 border-red-300 hover:bg-red-50"
+                  ? "bg-gradient-to-r from-green-600 to-green-700 shadow-lg"
+                  : "text-green-600 border-green-300 hover:bg-green-50"
               }
             >
               Qualifications
@@ -465,7 +465,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                 <div className="grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_150px_100px] items-center">
                   <div className="flex justify-center py-4"></div>
                   <div className="py-4 px-4 font-semibold text-slate-700 flex items-center">
-                    <span>Term</span>
+                    <span>Keyword</span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -547,7 +547,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                           </div>
                           <div className="hidden sm:block py-4 px-4 text-left">
                             <span
-                              className={`font-medium ${term.category === "responsibilities" ? "text-blue-600" : "text-red-600"}`}
+                              className={`font-medium ${term.category === "responsibilities" ? "text-purple-600" : "text-green-600"}`}
                             >
                               {term.category === "responsibilities"
                                 ? "Responsibility"
@@ -569,7 +569,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                               className="overflow-hidden"
                             >
                               <div className="px-4 pb-4">
-                                <Card className="border-l-4 border-l-purple-400 bg-gradient-to-r from-purple-50/50 to-pink-50/50 shadow-sm">
+                                <Card className="border-l-4 border-l-pink-600 bg-gradient-to-r from-purple-50/50 to-pink-50/50 shadow-sm">
                                   <CardContent className="p-4">
                                     <motion.div
                                       initial={{ y: -10, opacity: 0 }}
@@ -577,7 +577,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                                       transition={{ delay: 0.1, duration: 0.2 }}
                                     >
                                       <h4 className="font-semibold mb-3 text-sm flex items-center gap-2 text-slate-700">
-                                        Auto-Generated Sources
+                                        Companies & Roles
                                       </h4>
                                       <div className="flex flex-wrap gap-2">
                                         {term.sources &&

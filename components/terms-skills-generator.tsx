@@ -878,11 +878,11 @@ export function TermsSkillsGenerator({
           <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300 text-center">
             <CardTitle className="text-slate-800 text-2xl">
               {mode === "manual"
-                ? "Manual Skill Cloud"
-                : "Auto-Generated Skill Cloud"}
+                ? "Manual Keyword Cloud"
+                : "Auto-Generated Keyword Cloud"}
             </CardTitle>
             <CardDescription className="text-slate-600 text-lg">
-              Showing {currentTermsData.length} unique skills (
+              Showing {currentTermsData.length} unique keywords (
               {responsibilitiesCount} responsibilities, {skillsCount}{" "}
               qualifications) from {calculateTotalMentions(currentTermsData)}{" "}
               total mentions across {currentTotalListings} total listings

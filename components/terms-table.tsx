@@ -161,7 +161,7 @@ export function TermsTable({ terms }: TermsTableProps) {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="Filter terms..."
+              placeholder="Filter keywords..."
               className="pl-10 border-slate-200 focus:border-blue-400 focus:ring-blue-400/20 bg-white/80"
               value={filterValue}
               onChange={(e) => setFilterValue(e.target.value)}
@@ -188,8 +188,8 @@ export function TermsTable({ terms }: TermsTableProps) {
               size="sm"
               className={
                 categoryFilter === "responsibilities"
-                  ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg"
-                  : "text-blue-600 border-blue-300 hover:bg-blue-50"
+                  ? "bg-gradient-to-r from-purple-600 to-purple-700 shadow-lg"
+                  : "text-purple-600 border-purple-300 hover:bg-purple-50"
               }
             >
               Responsibilities
@@ -202,8 +202,8 @@ export function TermsTable({ terms }: TermsTableProps) {
               size="sm"
               className={
                 categoryFilter === "qualifications"
-                  ? "bg-gradient-to-r from-red-600 to-red-700 shadow-lg"
-                  : "text-red-600 border-red-300 hover:bg-red-50"
+                  ? "bg-gradient-to-r from-green-600 to-green-700 shadow-lg"
+                  : "text-green-600 border-green-300 hover:bg-green-50"
               }
             >
               Qualifications
@@ -299,7 +299,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                 <div className="grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_150px_100px] items-center">
                   <div className="flex justify-center py-4"></div>
                   <div className="py-4 px-4 font-semibold text-slate-700 flex items-center">
-                    <span>Term</span>
+                    <span>Keyword</span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -381,7 +381,7 @@ export function TermsTable({ terms }: TermsTableProps) {
                           </div>
                           <div className="hidden sm:block py-4 px-4 text-left">
                             <span
-                              className={`font-medium ${term.category === "responsibilities" ? "text-blue-600" : "text-red-600"}`}
+                              className={`font-medium ${term.category === "responsibilities" ? "text-purple-600" : "text-green-600"}`}
                             >
                               {term.category === "responsibilities"
                                 ? "Responsibility"

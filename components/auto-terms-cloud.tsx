@@ -100,13 +100,13 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
       span.style.fontWeight = "600";
 
       if (term.category === "responsibilities") {
-        span.style.color = "#2563eb"; // Blue-600
+        span.style.color = "#8b5cf6"; // Purple-600
         span.style.background =
-          "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.15))";
+          "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.15))";
       } else {
-        span.style.color = "#dc2626"; // Red-600
+        span.style.color = "#16a34a"; // Green-600
         span.style.background =
-          "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))";
+          "linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.15))";
       }
 
       // let tooltipText = `${term.term}: ${term.count} occurrences (${term.category === "responsibilities" ? "Responsibility" : "Skill"})`
@@ -123,10 +123,10 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
         span.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.15)";
         if (term.category === "responsibilities") {
           span.style.background =
-            "linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.25))";
+            "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.25))";
         } else {
           span.style.background =
-            "linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.25))";
+            "linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.25))";
         }
       });
 
@@ -135,10 +135,10 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
         span.style.boxShadow = "none";
         if (term.category === "responsibilities") {
           span.style.background =
-            "linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.15))";
+            "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.15))";
         } else {
           span.style.background =
-            "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.15))";
+            "linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.15))";
         }
       });
 
@@ -170,8 +170,8 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
             size="sm"
             className={
               filter === "responsibilities"
-                ? "bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg"
-                : "text-blue-600 border-blue-300 hover:bg-blue-50"
+                ? "bg-gradient-to-r from-purple-600 to-purple-700 shadow-lg"
+                : "text-purple-600 border-purple-300 hover:bg-purple-50"
             }
           >
             Responsibilities (
@@ -183,8 +183,8 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
             size="sm"
             className={
               filter === "qualifications"
-                ? "bg-gradient-to-r from-red-600 to-red-700 shadow-lg"
-                : "text-red-600 border-red-300 hover:bg-red-50"
+                ? "bg-gradient-to-r from-green-600 to-green-700 shadow-lg"
+                : "text-green-600 border-green-300 hover:bg-green-50"
             }
           >
             Qualifications (

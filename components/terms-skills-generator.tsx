@@ -459,18 +459,18 @@ export function TermsSkillsGenerator({
       {mode === "manual" ? (
         <>
           {/* Manual Input Mode */}
-          <Card className="bg-white border-slate-300 shadow-xl rounded">
-            <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-300">
+          <Card className="bg-white border-slate-300 shadow-xl rounded-lg">
+            <CardHeader className="rounded-t-lg bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-300">
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block p-2 bg-blue-100 rounded-lg">
                   <Building className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <CardTitle className="text-slate-800">
-                    Job Listing Information
+                    Company and Role
                   </CardTitle>
                   <CardDescription className="text-slate-600">
-                    Enter company and role information about the job listing
+                    Enter company and role information from a job listing
                   </CardDescription>
                 </div>
               </div>
@@ -514,7 +514,7 @@ export function TermsSkillsGenerator({
             <Card
               className={`bg-white border-slate-300 shadow-xl ${isOverLimit(responsibilitiesChars) ? "border-red-300 shadow-red-100" : ""}`}
             >
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-300">
+              <CardHeader className="rounded-t-lg bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-300">
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:block p-2 bg-blue-100 rounded-lg">
                     <Briefcase className="h-5 w-5 text-blue-600" />
@@ -564,7 +564,7 @@ export function TermsSkillsGenerator({
             <Card
               className={`bg-white border-slate-300 shadow-xl ${isOverLimit(qualificationsChars) ? "border-red-300 shadow-red-100" : ""}`}
             >
-              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-300">
+              <CardHeader className="rounded-t-lg bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-300">
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:block p-2 bg-indigo-100 rounded-lg">
                     <Briefcase className="h-5 w-5 text-indigo-600" />
@@ -875,7 +875,13 @@ export function TermsSkillsGenerator({
 
       {currentTermsData.length > 0 && (
         <Card className="bg-white border-slate-300 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50 border-b border-slate-300 text-center">
+          <CardHeader
+            className={`rounded-lg border-slate-300 text-center ${
+              mode === "manual"
+                ? "bg-gradient-to-r from-slate-50 via-blue-50 to-indigo-50"
+                : "bg-gradient-to-r from-slate-50 to-purple-50"
+            }`}
+          >
             <CardTitle className="text-slate-800 text-2xl">
               {mode === "manual"
                 ? "Manual Keyword Cloud"

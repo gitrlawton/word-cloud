@@ -464,7 +464,7 @@ export function TermsTable({ terms }: TermsTableProps) {
       </div>
 
       <div className="text-sm text-slate-500 font-medium">
-        Showing {sortedTerms.length} of {sanitizedTerms.length} terms
+        Showing {sortedTerms.length} of {sanitizedTerms.length} keywords
       </div>
     </div>
   );

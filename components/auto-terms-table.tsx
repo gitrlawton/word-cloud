@@ -460,7 +460,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
       <div className="border border-slate-200/60 rounded-xl overflow-hidden bg-white/70 backdrop-blur-sm shadow-lg">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
+            <TableRow className="bg-gradient-to-r from-slate-50 to-pink-50 border-b border-slate-200">
               <TableHead className="p-0">
                 <div className="grid grid-cols-[40px_1fr_100px] sm:grid-cols-[40px_1fr_150px_100px] items-center">
                   <div className="flex justify-center py-4"></div>
@@ -630,8 +630,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
       </div>
 
       <div className="text-sm text-slate-500 font-medium">
-        Showing {sortedTerms.length} of {sanitizedTerms.length} auto-generated
-        terms
+        Showing {sortedTerms.length} of {sanitizedTerms.length} keywords
       </div>
     </div>
   );

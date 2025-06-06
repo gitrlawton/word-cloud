@@ -307,7 +307,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
               className={
                 categoryFilter === "qualifications"
                   ? "bg-gradient-to-r from-green-600 to-green-700 shadow-lg"
-                  : "text-green-600 border-green-300 hover:bg-green-50"
+                  : "text-green-600 border-green-400 hover:bg-green-50"
               }
             >
               Qualifications

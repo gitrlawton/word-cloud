@@ -262,7 +262,7 @@ export function TermsSkillsGenerator({
 
       toast({
         title: "Analysis complete",
-        description: `Added ${data.terms.length} terms to your manual cloud.`,
+        description: `Added ${data.terms.length} keywords to your manual cloud.`,
       });
 
       setResponsibilities("");
@@ -343,7 +343,7 @@ export function TermsSkillsGenerator({
 
       toast({
         title: "Auto-generation complete",
-        description: `Added ${data.terms.length} terms from ${data.totalListings || 0} job listings to your auto-generated cloud.`,
+        description: `Added ${data.terms.length} keywords from ${data.totalListings || 0} job listings to your auto-generated cloud.`,
       });
 
       setAutoRole("");

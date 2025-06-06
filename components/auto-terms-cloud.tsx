@@ -98,29 +98,46 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
       span.style.transition = "all 0.3s ease";
       span.style.borderRadius = "8px";
       span.style.fontWeight = "600";
+      span.style.position = "relative";
+
+      // Create tooltip element
+      const tooltip = document.createElement("span");
+      tooltip.textContent = `Count: ${term.count}`;
+      tooltip.style.position = "absolute";
+      tooltip.style.bottom = "100%";
+      tooltip.style.left = "50%";
+      tooltip.style.transform = "translateX(-50%) translateY(-8px)";
+      tooltip.style.padding = "4px 8px";
+      tooltip.style.borderRadius = "4px";
+      tooltip.style.fontSize = "12px";
+      tooltip.style.fontWeight = "500";
+      tooltip.style.opacity = "0";
+      tooltip.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+      tooltip.style.pointerEvents = "none";
+      tooltip.style.whiteSpace = "nowrap";
 
       if (term.category === "responsibilities") {
         span.style.color = "#8b5cf6"; // Purple-600
         span.style.background =
           "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.15))";
+        tooltip.style.backgroundColor = "#8b5cf6";
+        tooltip.style.color = "white";
       } else {
         span.style.color = "#16a34a"; // Green-600
         span.style.background =
           "linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.15))";
+        tooltip.style.backgroundColor = "#16a34a";
+        tooltip.style.color = "white";
       }
 
-      // let tooltipText = `${term.term}: ${term.count} occurrences (${term.category === "responsibilities" ? "Responsibility" : "Skill"})`
-      // if (term.sources && term.sources.length > 0) {
-      //   tooltipText += `\nSources: ${term.sources
-      //     .filter((s) => s && typeof s === "object")
-      //     .map((s) => `${String(s.company || "Unknown Company")} - ${String(s.role || "Unknown Role")}`)
-      //     .join(", ")}`
-      // }
-      // span.title = tooltipText
+      // Add tooltip to the span
+      span.appendChild(tooltip);
 
       span.addEventListener("mouseover", () => {
         span.style.transform = "scale(1.1) translateY(-2px)";
         span.style.boxShadow = "0 8px 25px rgba(0, 0, 0, 0.15)";
+        tooltip.style.opacity = "1";
+        tooltip.style.transform = "translateX(-50%) translateY(-12px)";
         if (term.category === "responsibilities") {
           span.style.background =
             "linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(124, 58, 237, 0.25))";
@@ -133,6 +150,8 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
       span.addEventListener("mouseout", () => {
         span.style.transform = "scale(1) translateY(0)";
         span.style.boxShadow = "none";
+        tooltip.style.opacity = "0";
+        tooltip.style.transform = "translateX(-50%) translateY(-8px)";
         if (term.category === "responsibilities") {
           span.style.background =
             "linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.15))";
@@ -184,7 +203,7 @@ export function AutoTermsCloud({ terms }: AutoTermsCloudProps) {
             className={
               filter === "qualifications"
                 ? "bg-gradient-to-r from-green-600 to-green-700 shadow-lg"
-                : "text-green-600 border-green-300 hover:bg-green-50"
+                : "text-green-600 border-green-400 hover:bg-green-50"
             }
           >
             Qualifications (

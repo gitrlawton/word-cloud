@@ -328,7 +328,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   {companyFilter || "Companies"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
+              <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
                 <DropdownMenuCheckboxItem
                   checked={companyFilter === null}
                   onCheckedChange={() => setCompanyFilter(null)}
@@ -358,7 +358,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   {roleFilter || "Roles"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
+              <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
                 <DropdownMenuCheckboxItem
                   checked={roleFilter === null}
                   onCheckedChange={() => setRoleFilter(null)}
@@ -388,7 +388,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   {sectorFilter || "Sectors"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
+              <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
                 <DropdownMenuCheckboxItem
                   checked={sectorFilter === null}
                   onCheckedChange={() => setSectorFilter(null)}
@@ -418,7 +418,7 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   {experienceFilter || "Experience"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-white/95 backdrop-blur-sm border-slate-200">
+              <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
                 <DropdownMenuCheckboxItem
                   checked={experienceFilter === null}
                   onCheckedChange={() => setExperienceFilter(null)}

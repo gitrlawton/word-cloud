@@ -211,7 +211,7 @@ export function TermsCloud({ terms }: TermsCloudProps) {
               <SelectTrigger className="min-[437px]:w-[200px] border-slate-300 text-slate-700 hover:bg-slate-50">
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-64">
                 <SelectItem value="all">All Roles</SelectItem>
                 {availableRoles.map((role) => (
                   <SelectItem key={role} value={role}>

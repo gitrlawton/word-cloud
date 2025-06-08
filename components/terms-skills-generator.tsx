@@ -336,14 +336,25 @@ export function TermsSkillsGenerator({
       const updatedTerms = mergeTerms(autoTermsData, termsWithValidatedSources);
       setAutoTermsData(updatedTerms);
 
-      // Add the total listings from the API response
-      if (typeof data.totalListings === "number") {
-        setAutoTotalListings((prev) => prev + data.totalListings);
-      }
+      // Get unique sources from the API response
+      const uniqueSources = new Set<string>();
+      data.terms.forEach((term: TermCount) => {
+        if (term.sources) {
+          term.sources.forEach((source) => {
+            if (source && source.company && source.role) {
+              uniqueSources.add(`${source.company}:${source.role}`);
+            }
+          });
+        }
+      });
+
+      // Update totalListings with the count of unique sources
+      const uniqueSourcesCount = uniqueSources.size;
+      setAutoTotalListings(uniqueSourcesCount);
 
       toast({
         title: "Auto-generation complete",
-        description: `Added ${data.terms.length} keywords from ${data.totalListings || 0} job listings to your auto-generated cloud.`,
+        description: `Added ${data.terms.length} keywords from ${uniqueSourcesCount} job listings to your auto-generated cloud.`,
       });
 
       setAutoRole("");
@@ -888,7 +899,7 @@ export function TermsSkillsGenerator({
                 : "Auto-Generated Keyword Cloud"}
             </CardTitle>
             <CardDescription className="text-slate-600 text-lg">
-              Showing {currentTermsData.length} unique keywords (
+              Contains {currentTermsData.length} unique keywords (
               {responsibilitiesCount} responsibilities, {skillsCount}{" "}
               qualifications) from {calculateTotalMentions(currentTermsData)}{" "}
               total mentions across {currentTotalListings} total listings

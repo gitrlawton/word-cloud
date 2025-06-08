@@ -12,19 +12,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Build the search query
-    let searchQuery = `${role} ${experience} job listings responsibilities qualifications requirements`;
-    if (company) {
-      searchQuery += ` at ${company}`;
-    }
-    if (sector) {
-      searchQuery += ` in ${sector} industry`;
-    }
-    searchQuery +=
-      " site:linkedin.com OR site:indeed.com OR site:glassdoor.com";
-
     const prompt = `
-You are a specialized job market researcher. I need you to search for 17 current job listings from this year for the following criteria and extract skills and responsibilities with their source information.
+I need you to search for as many current job listings as possible from this year that match the 
+following criteria.  Then, extract skills and responsibilities from the listings with their source information. 
 
 SEARCH CRITERIA:
 - Role: ${role}
@@ -62,18 +52,15 @@ Categorize each item as either "responsibilities" or "qualifications". Return ON
          ]
        },
        ...
-     ],
-     "totalListings": total_number_of_unique_job_listings_analyzed
+     ]
    }
 
 IMPORTANT RULES:
 - Each term should consist of 2-3 words
 - Count should reflect how many times the term appeared across your job listings search (an integer >= 1.)
-- STRICTLY adhere to the role title "${role}" - do not include tangentially related roles
-- If no specific company is mentioned, do not include the listing in your search.  DO NOT use job board site for the company name (Indeed, Monster, Glassdoor, etc.)
+- STRICTLY adhere to the role title "${role}" - do not include tangentially related roles  
 - Ensure the JSON is valid and properly formatted
 - Make sure all counts are numeric values, not objects or strings
-- Include the total number of unique job listings analyzed in the "totalListings" field
 - Do not include any explanations or text outside the JSON structure
 
 EXAMPLE OUTPUT:
@@ -81,7 +68,7 @@ EXAMPLE OUTPUT:
   "terms": [
     {
       "term": "react development", 
-      "count": 8, 
+      "count": 3, 
       "category": "qualifications",
       "sources": [
         {"company": "Meta", "role": "Frontend Engineer"},
@@ -91,7 +78,7 @@ EXAMPLE OUTPUT:
     },
     {
       "term": "cross-functional collaboration", 
-      "count": 7, 
+      "count": 2, 
       "category": "responsibilities",
       "sources": [
         {"company": "Google", "role": "Software Engineer II"},
@@ -100,7 +87,7 @@ EXAMPLE OUTPUT:
     },
     {
       "term": "javascript proficiency", 
-      "count": 9, 
+      "count": 3, 
       "category": "qualifications",
       "sources": [
         {"company": "Stripe", "role": "Frontend Developer"},
@@ -108,8 +95,7 @@ EXAMPLE OUTPUT:
         {"company": "Uber", "role": "Software Engineer"}
       ]
     }
-  ],
-  "totalListings": 15
+  ]
 }
 `;
 
@@ -127,6 +113,9 @@ EXAMPLE OUTPUT:
             content: prompt,
           },
         ],
+        web_search_options: {
+          search_context_size: "medium",
+        },
         temperature: 0.1,
       }),
     });

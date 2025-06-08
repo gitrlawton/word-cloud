@@ -1,23 +1,27 @@
-import { NextResponse } from "next/server"
-import { jsonrepair } from "jsonrepair"
+import { NextResponse } from "next/server";
+import { jsonrepair } from "jsonrepair";
 
 export async function POST(request: Request) {
   try {
-    const { role, sector, experience, company } = await request.json()
+    const { role, sector, experience, company } = await request.json();
 
     if (!role || !experience) {
-      return NextResponse.json({ error: "Role and experience level are required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Role and experience level are required" },
+        { status: 400 }
+      );
     }
 
     // Build the search query
-    let searchQuery = `${role} ${experience} job listings responsibilities qualifications requirements`
+    let searchQuery = `${role} ${experience} job listings responsibilities qualifications requirements`;
     if (company) {
-      searchQuery += ` at ${company}`
+      searchQuery += ` at ${company}`;
     }
     if (sector) {
-      searchQuery += ` in ${sector} industry`
+      searchQuery += ` in ${sector} industry`;
     }
-    searchQuery += " site:linkedin.com OR site:indeed.com OR site:glassdoor.com"
+    searchQuery +=
+      " site:linkedin.com OR site:indeed.com OR site:glassdoor.com";
 
     const prompt = `
 You are a specialized job market researcher. I need you to search for 17 current job listings from this year for the following criteria and extract skills and responsibilities with their source information.
@@ -86,7 +90,7 @@ EXAMPLE OUTPUT:
       ]
     },
     {
-      "term": "team collaboration", 
+      "term": "cross-functional collaboration", 
       "count": 7, 
       "category": "responsibilities",
       "sources": [
@@ -107,7 +111,7 @@ EXAMPLE OUTPUT:
   ],
   "totalListings": 15
 }
-`
+`;
 
     const response = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
@@ -125,57 +129,72 @@ EXAMPLE OUTPUT:
         ],
         temperature: 0.1,
       }),
-    })
+    });
 
     if (!response.ok) {
-      const errorData = await response.json()
-      console.error("Perplexity API error:", errorData)
-      return NextResponse.json({ error: "Error calling Perplexity API" }, { status: response.status })
+      const errorData = await response.json();
+      console.error("Perplexity API error:", errorData);
+      return NextResponse.json(
+        { error: "Error calling Perplexity API" },
+        { status: response.status }
+      );
     }
 
-    const data = await response.json()
+    const data = await response.json();
 
     try {
-      const content = data.choices[0].message.content
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      const jsonString = jsonMatch ? jsonMatch[0] : "{}"
+      const content = data.choices[0].message.content;
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : "{}";
 
       // Attempt to repair the JSON string
-      const repairedJsonString = jsonrepair(jsonString)
+      const repairedJsonString = jsonrepair(jsonString);
 
       // Parse the repaired JSON string
-      const parsedData = JSON.parse(repairedJsonString)
+      const parsedData = JSON.parse(repairedJsonString);
 
       // Validate and sanitize the terms
       if (parsedData.terms && Array.isArray(parsedData.terms)) {
         parsedData.terms = parsedData.terms.map((term: any) => ({
-          term: String(term.term || "Unknown Term"),
-          count: typeof term.count === "number" ? Math.max(1, Math.min(10, term.count)) : 1,
-          category: term.category === "responsibilities" ? "responsibilities" : "qualifications",
+          term: String(term.term || "Unknown Term").replace(/-/g, " "), // Replace hyphens with spaces
+          count:
+            typeof term.count === "number"
+              ? Math.max(1, Math.min(10, term.count))
+              : 1,
+          category:
+            term.category === "responsibilities"
+              ? "responsibilities"
+              : "qualifications",
           sources: Array.isArray(term.sources)
             ? term.sources.map((source: any) => ({
                 company: String(source.company || "Unknown Company"),
                 role: String(source.role || "Unknown Role"),
               }))
             : [{ company: "Market Research", role: `${role} (${experience})` }],
-        }))
+        }));
       } else {
-        parsedData.terms = []
+        parsedData.terms = [];
       }
 
       // Ensure totalListings is a number
       if (typeof parsedData.totalListings !== "number") {
-        parsedData.totalListings = 0
+        parsedData.totalListings = 0;
       }
 
-      return NextResponse.json(parsedData)
+      return NextResponse.json(parsedData);
     } catch (error) {
-      console.error("Error parsing Perplexity response:", error)
-      console.log("Raw response:", data.choices[0].message.content)
-      return NextResponse.json({ error: "Error parsing Perplexity response" }, { status: 500 })
+      console.error("Error parsing Perplexity response:", error);
+      console.log("Raw response:", data.choices[0].message.content);
+      return NextResponse.json(
+        { error: "Error parsing Perplexity response" },
+        { status: 500 }
+      );
     }
   } catch (error) {
-    console.error("Server error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Server error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

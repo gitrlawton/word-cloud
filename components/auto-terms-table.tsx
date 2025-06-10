@@ -324,8 +324,10 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   size="sm"
                   className="border-slate-300 text-slate-700 hover:bg-slate-50"
                 >
-                  <Building className="mr-2 h-4 w-4" />
-                  {companyFilter || "Companies"}
+                  <Building className="block sm:hidden lg:block mr-2 h-4 w-4" />
+                  <span className="truncate">
+                    {companyFilter || "Companies"}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
@@ -354,8 +356,8 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   size="sm"
                   className="border-slate-300 text-slate-700 hover:bg-slate-50"
                 >
-                  <Briefcase className="mr-2 h-4 w-4" />
-                  {roleFilter || "Roles"}
+                  <Briefcase className="block sm:hidden lg:block mr-2 h-4 w-4" />
+                  <span className="truncate">{roleFilter || "Roles"}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
@@ -384,8 +386,8 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   size="sm"
                   className="border-slate-300 text-slate-700 hover:bg-slate-50"
                 >
-                  <Building className="mr-2 h-4 w-4" />
-                  {sectorFilter || "Sectors"}
+                  <Building className="block sm:hidden lg:block mr-2 h-4 w-4" />
+                  <span className="truncate">{sectorFilter || "Sectors"}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">
@@ -414,8 +416,10 @@ export function AutoTermsTable({ terms }: AutoTermsTableProps) {
                   size="sm"
                   className="border-slate-300 text-slate-700 hover:bg-slate-50"
                 >
-                  <Briefcase className="mr-2 h-4 w-4" />
-                  {experienceFilter || "Experience"}
+                  <Briefcase className="block sm:hidden lg:block mr-2 h-4 w-4" />
+                  <span className="truncate">
+                    {experienceFilter || "Experience"}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64 bg-white/95 backdrop-blur-sm border-slate-200">

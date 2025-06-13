@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-I need you to search for as many current job listings as possible from this year that match the 
+I need you to search 13 current job listings from this year that match the 
 following criteria.  Then, extract skills and responsibilities from the listings with their source information. 
 
 SEARCH CRITERIA:
@@ -113,9 +113,19 @@ EXAMPLE OUTPUT:
             content: prompt,
           },
         ],
+        search_after_date_filter: "1/1/2024",
         web_search_options: {
           search_context_size: "medium",
+          user_location: {
+            country: "US",
+          },
         },
+        search_domain_filter: [
+          "-indeed.com",
+          "-glassdoor.com",
+          "-monster.com",
+          "-ziprecruiter.com",
+        ],
         temperature: 0.1,
       }),
     });
